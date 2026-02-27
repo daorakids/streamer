@@ -1,0 +1,41 @@
+# DEPOSITAR ESSE ARQUIVO EM
+# /etc/systemd/system/daorakids-live.service
+
+# HABILITANDO O SERVICO DE STREAM LIVE NO BOOT PELA PRIMEIRA VEZ
+# sudo systemctl daemon-reload
+# sudo systemctl enable daorakids-live.service
+# sudo systemctl start daorakids-live.service
+
+# PARAR A TRANSMISSAO
+# sudo systemctl stop daorakids-live.service
+
+# VOLTAR A TRANSMISSAO
+# sudo systemctl start daorakids-live.service
+
+# DESABILITAR O SERVICO DO BOOT
+# sudo systemctl disable daorakids-live.service
+
+
+# ================================
+
+
+[Unit]
+# Descrição do serviço para o sistema
+Description=Transmissao 24h YouTube
+# Garante que o serviço só inicie após a rede estar pronta
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+# Usuário que executará o script
+User=stream
+# Comando principal para iniciar a live
+ExecStart=/bin/bash /home/stream/iniciar_live.sh
+# Política de reinicialização automática em caso de falha
+Restart=always
+# Aguarda 5 segundos antes de cada tentativa de restart
+RestartSec=5
+
+[Install]
+# Define que o serviço deve subir junto com o modo multiusuário (boot padrão)
+WantedBy=multi-user.target

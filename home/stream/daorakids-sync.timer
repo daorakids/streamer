@@ -1,0 +1,30 @@
+# DEPOSITAR ESSE ARQUIVO EM
+# /etc/systemd/system/daorakids-sync.timer
+
+# HABILITANDO O SERVICO DE SYNC DE VIDEOS NO BOOT PELA PRIMEIRA VEZ
+# sudo systemctl daemon-reload
+# sudo systemctl enable daorakids-sync.timer
+# sudo systemctl start daorakids-sync.timer
+
+# PARAR O SYNC
+# sudo systemctl stop daorakids-sync.timer
+
+# VOLTAR O SYNC
+# sudo systemctl start daorakids-sync.timer
+
+# DESABILITAR O SERVICO DO BOOT
+# sudo systemctl disable daorakids-sync.timer
+
+
+# ================================
+
+
+[Unit]
+Description=Roda a sincronizacao a cada hora
+
+[Timer]
+OnBootSec=5min
+OnUnitActiveSec=1h
+
+[Install]
+WantedBy=timers.target

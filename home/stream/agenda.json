@@ -1,0 +1,57 @@
+{
+  "emergency_stop": false,
+  "stream_keys": {
+    "pt": "gjcj-xxxx-xxxx-xxxx-pt",
+    "en": "abcd-yyyy-yyyy-yyyy-en",
+    "es": "qwer-zzzz-zzzz-zzzz-es"
+  },
+  "schedule": {
+    "mon": [
+      {"lang": "pt", "start": "08:00", "end": "11:55", "mode": "sequential"},
+      {"lang": "en", "start": "13:00", "end": "16:55", "mode": "sequential"},
+      {"lang": "es", "start": "18:00", "end": "21:55", "mode": "sequential"}
+    ],
+    "tue": [
+      {"lang": "es", "start": "08:00", "end": "11:55", "mode": "sequential"},
+      {"lang": "pt", "start": "13:00", "end": "16:55", "mode": "sequential"},
+      {"lang": "en", "start": "18:00", "end": "21:55", "mode": "sequential"}
+    ],
+    "wed": [
+      {"lang": "en", "start": "08:00", "end": "11:55", "mode": "sequential"},
+      {"lang": "es", "start": "13:00", "end": "16:55", "mode": "sequential"},
+      {"lang": "pt", "start": "18:00", "end": "21:55", "mode": "sequential"}
+    ],
+    "thu": [
+      {"lang": "pt", "start": "08:00", "end": "11:55", "mode": "sequential"},
+      {"lang": "en", "start": "13:00", "end": "16:55", "mode": "sequential"},
+      {"lang": "es", "start": "18:00", "end": "21:55", "mode": "sequential"}
+    ],
+    "fri": [
+      {"lang": "es", "start": "08:00", "end": "11:55", "mode": "sequential"},
+      {"lang": "pt", "start": "13:00", "end": "16:55", "mode": "sequential"},
+      {"lang": "pt", "start": "17:00", "end": "18:55", "mode": "random"},
+      {"lang": "en", "start": "19:00", "end": "20:55", "mode": "random"},
+      {"lang": "es", "start": "21:00", "end": "22:55", "mode": "random"}
+    ],
+    "sat": [
+      {"lang": "en", "start": "08:00", "end": "11:55", "mode": "sequential"},
+      {"lang": "es", "start": "13:00", "end": "16:55", "mode": "sequential"},
+      {"lang": "en", "start": "17:00", "end": "18:55", "mode": "random"},
+      {"lang": "es", "start": "19:00", "end": "20:55", "mode": "random"},
+      {"lang": "pt", "start": "21:00", "end": "22:55", "mode": "random"}
+    ],
+    "sun": [
+      {"lang": "pt", "start": "08:00", "end": "11:55", "mode": "sequential"},
+      {"lang": "en", "start": "13:00", "end": "16:55", "mode": "sequential"},
+      {"lang": "es", "start": "17:00", "end": "18:55", "mode": "random"},
+      {"lang": "pt", "start": "19:00", "end": "20:55", "mode": "random"},
+      {"lang": "en", "start": "21:00", "end": "22:55", "mode": "random"}
+    ]
+  },
+  "special_dates": {
+    "2026-10-12": [
+      {"lang": "pt", "start": "06:00", "end": "12:00", "mode": "sequential"},
+      {"lang": "pt", "start": "12:01", "end": "23:59", "mode": "random"}
+    ]
+  }
+}

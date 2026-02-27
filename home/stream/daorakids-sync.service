@@ -1,0 +1,22 @@
+# DEPOSITAR ESSE ARQUIVO EM
+# /etc/systemd/system/daorakids-sync.service
+
+# ESTE PROGRAMA CRON RODA VIA /etc/systemd/system/daorakids-sync.timer
+# /etc/systemd/system/daorakids-sync.service
+
+
+# ================================
+
+
+[Unit]
+Description=Sincroniza videos do site para o Pi
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=stream
+Nice=19
+IOSchedulingClass=idle
+ExecStart=/usr/bin/wget --user=stream --password=stream -c -N -r -np -nd -A mp4 --tries=10 --retry-connrefused --waitretry=5 -P /home/stream/videos https://daorakids.com.br/util/stream/
+
