@@ -9,18 +9,9 @@ def run_cmd(cmd, sudo=False):
     if sudo: cmd = f"sudo {cmd}"
     return subprocess.run(cmd, shell=True, capture_output=True, text=True)
 
-def get_ips():
-    try:
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.connect(("8.8.8.8", 80))
-        internal = s.getsockname()[0]
-        s.close()
-    except: internal = "N/A"
-    return internal
-
 def setup_wizard():
     print("\n" + "="*40)
-    print(" 🎨 BEM-VINDO AO INSTALADOR DAORA KIDS v2.0 ")
+    print(" 🎨 BEM-VINDO AO INSTALADOR DAORA KIDS v2.2 ")
     print("="*40 + "\n")
 
     # 1. YouTube
@@ -38,7 +29,6 @@ def setup_wizard():
     sync_user = input("Usuário do Servidor [stream]: ").strip() or "stream"
     sync_pass = input("Senha do Servidor [stream]: ").strip() or "stream"
 
-    # Cálculo do cut-dirs para o wget (quantas pastas pular na URL)
     parsed_url = urlparse(sync_url)
     path_parts = [p for p in parsed_url.path.split('/') if p]
     cut_dirs = len(path_parts)
@@ -71,9 +61,7 @@ SYNC_PASS="{sync_pass}"
             run_cmd("cp /tmp/fstab /etc/fstab", sudo=True)
     run_cmd("mount -a", sudo=True)
 
-    # 7. Sync Service (Preservando Estrutura de Pastas)
-    # -nH (No Host): não cria pasta do domínio
-    # --cut-dirs: remove o caminho do servidor para salvar pt/ en/ es/ direto na raiz do pendrive
+    # 7. Sync Service
     sync_service = f"""[Unit]
 Description=Sincroniza videos do site para o Pi
 After=network-online.target
@@ -87,7 +75,27 @@ ExecStart=/usr/bin/wget --user={sync_user} --password={sync_pass} -c -N -r -np -
         f.write(sync_service)
     run_cmd("cp /tmp/daorakids-sync.service /etc/systemd/system/daorakids-sync.service", sudo=True)
 
-    # 8. Auto-login e Outros
+    # 8. Sudo sem senha para o journalctl (Para o monitoramento automático)
+    sudo_rule = "stream ALL=(ALL) NOPASSWD: /usr/bin/journalctl"
+    with open("/tmp/daorakids-logs", "w") as f:
+        f.write(sudo_rule)
+    run_cmd("cp /tmp/daorakids-logs /etc/sudoers.d/daorakids-logs", sudo=True)
+
+    # 9. Configurar Monitoramento Automático no Login
+    bashrc_path = "/home/stream/.bashrc"
+    monitor_cmd = """
+# --- MONITORAMENTO AUTOMÁTICO DA LIVE ---
+if [[ -t 0 ]]; then
+    echo ""
+    echo "📺 MONITORANDO LIVE... (Ctrl+C para o Prompt)"
+    echo "---------------------------------------------------------------"
+    sudo journalctl -u daorakids-live.service -f -n 20
+fi
+"""
+    with open(bashrc_path, "a") as f:
+        f.write(monitor_cmd)
+
+    # 10. Auto-login e Outros
     run_cmd("systemctl daemon-reload", sudo=True)
     run_cmd("systemctl enable --now daorakids-sync.timer", sudo=True)
     
