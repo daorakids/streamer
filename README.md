@@ -2,44 +2,33 @@
 
 Sistema de Streaming Kids 24/7 (Raspberry Pi 3).
 
-## 🚀 Como Instalar (Zero-Touch Setup)
+## 🚀 Arquitetura (Cérebro + Bash)
 
-1. Instale o **Raspberry Pi OS Legacy 64-Bit** (Lite).
-2. Conecte o Pi na rede, acesse via SSH e rode:
-   ```bash
-   curl -sSL https://raw.githubusercontent.com/SEU_USUARIO/daorakids/main/setup.sh | bash
-   ```
-3. Siga o Wizard Python (YouTube Keys, Telegram e URL do servidor).
+O sistema opera com um "Cérebro" em Python (`cerebro.py`) rodando via Cron a cada 5 minutos, que coordena um "Braço" em Bash (`iniciar_live.sh`) responsável pelo FFmpeg.
 
-## 📂 Configuração do Servidor de Vídeos (Apache)
+### 🔄 Sincronização Automática
+- **Agenda (`schedule.json`):** O `cerebro.py` baixa a agenda do servidor a cada 5 minutos. Se houver qualquer mudança no slot de transmissão atual (Idioma, Modo ou Chave), a live é reiniciada instantaneamente com a nova configuração.
+- **Vídeos (`.mp4`):** O serviço `daorakids-sync.service` sincroniza os vídeos via `wget` a cada 1 hora, mantendo o Pendrive atualizado.
 
-Para o Raspberry sincronizar os vídeos, seu servidor Apache deve permitir a listagem.
+## 📂 Configuração do Servidor
 
-1. **Estrutura no Servidor:**
+Para o Raspberry sincronizar, seu servidor (Apache/Nginx) deve permitir a listagem de arquivos e proteger a pasta.
+
+1. **Estrutura no Servidor (`/util/stream/`):**
    ```text
    /util/stream/
-   ├── .htaccess
-   ├── .htpasswd
-   ├── pt/ (vídeos aqui)
-   ├── en/ (vídeos aqui)
-   └── es/ (vídeos aqui)
+   ├── schedule.json (Agenda de horários e chaves)
+   ├── pt/ (vídeos em português)
+   ├── en/ (vídeos em inglês)
+   └── es/ (vídeos em espanhol)
    ```
 
-2. **Crie o `.htaccess` na raiz da pasta de vídeos:**
-   ```apache
-   Options +Indexes
-   AuthType Basic
-   AuthName "Acesso Restrito"
-   AuthUserFile /caminho/absoluto/para/.htpasswd
-   Require valid-user
-   ```
+2. **O arquivo `schedule.json`:**
+   Este arquivo controla tudo remotamente. Você pode definir horários semanais, datas especiais (como Dia das Crianças) e as chaves de transmissão do YouTube.
 
-3. **Gere o `.htpasswd` (via SSH no servidor):**
-   `htpasswd -c .htpasswd stream` (Cria o usuário 'stream' e pede a senha).
-
-## 🩺 Manutenção Automática
-- **01:00 às 05:00:** Período de resfriamento.
-- **Check-up:** Notifica no Telegram apenas se houver problemas (Temp > 70°C, Disco Cheio ou Erro de HW).
+## 🩺 Manutenção e Saúde
+- **Notificações:** Alertas de erro no Pendrive, troca de idioma e status da live via Telegram.
+- **Resiliência:** O loop Bash garante que, se o FFmpeg cair por queda de conexão, ele reinicie em 5 segundos.
 
 ---
 Desenvolvido por Bruno Grange.
