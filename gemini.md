@@ -1,23 +1,25 @@
-# Projeto Daora Kids v2.0 📺🍿
+# Projeto Daora Kids v2.2 📺🍿
 
-**Status:** v2.0 Sincronização Web Ativada (Cérebro v2.1).
+**Status:** v2.2 Bootstrap na Raiz + Sincronização Web Ativada (Cérebro v2.1).
 
 ## 🚀 Arquitetura Atual (Sincronização Remota)
 
-1.  **Cérebro Python (`cerebro.py`):**
-    - **Sincronização 5-5min:** Baixa `schedule.json` da web a cada 5 minutos.
-    - **Detecção de Mudança:** Se o slot atual (Idioma, Modo ou Chave) mudar após o download, reinicia a live imediatamente via `pkill ffmpeg`.
-    - **Resiliência Offline:** Se o servidor de agenda estiver fora do ar, usa a última versão salva localmente (`schedule.json`).
+1.  **Instalação Bootstrap (`setup.sh`):**
+    - Arquivo movido para a raiz do projeto.
+    - Suporta instalação limpa com comando de uma linha (`curl | bash`), baixando o repositório completo antes de invocar o Wizard Python.
 
-2.  **Sincronização de Vídeos (`daorakids-sync.service`):**
-    - Sincroniza arquivos `.mp4` a cada hora do servidor para o Pendrive (`/mnt/videos`).
+2.  **Cérebro Python (`cerebro.py`):**
+    - **Sincronização 5-5min:** Baixa `schedule.json` da web com validação de formato.
+    - **Detecção de Mudança:** Se o slot atual (Idioma, Modo ou Chave) mudar, reinicia a live gentilmente via `pkill -f ffmpeg`.
+    - **Case Insensitive:** A busca pelas pastas de vídeo no pendrive ignora maiúsculas/minúsculas.
+    - **Resiliência Offline:** Se o servidor estiver fora, usa a última versão salva localmente.
 
-3.  **Streaming Bash (`iniciar_live.sh`):**
-    - Loop resiliente (Sequential/Random) que reage às mudanças do Cérebro via `.current_config`.
+3.  **Sincronização de Vídeos (`daorakids-sync.service`):**
+    - Sincroniza arquivos `.mp4` a cada hora.
+    - **Sync-On-Demand:** O Cérebro dispara uma sincronização imediata se o idioma da agenda for alterado.
 
-4.  **Configuração de Servidor:**
-    - Padronizado para `schedule.json` em todos os diretórios.
-    - Chaves do YouTube agora podem ser atualizadas remotamente no `schedule.json`.
+4.  **Streaming Bash (`iniciar_live.sh`):**
+    - Loop resiliente que reage às mudanças do Cérebro via `.current_config`.
 
 5.  **Manutenção e Saúde:**
     - Notificações de Alerta e Status no Telegram (IP, Idioma e Modo).
