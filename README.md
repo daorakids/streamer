@@ -4,9 +4,9 @@ Sistema de Streaming Kids 24/7 (Raspberry Pi 3) - Blindado e Totalmente Remoto.
 
 ## 🚀 Como Instalar ou Atualizar (Zero-Touch Setup)
 
-1. **Nova Instalação:** Instale o **Raspberry Pi OS Legacy 64-Bit** (Lite), conecte via SSH e rode:
+1. **Nova Instalação:** Instale o **Raspberry Pi OS Legacy 64-Bit** (Lite), conecte via SSH e rode o comando de "Autocura" (que ignora o cache e tenta destravar o disco):
    ```bash
-   curl -sSL https://raw.githubusercontent.com/daorakids/streamer/main/setup.sh > setup.sh && sudo bash setup.sh
+   sudo mount -o remount,rw / && curl -sSL "https://raw.githubusercontent.com/daorakids/streamer/main/setup.sh?$(date +%s)" | sudo bash
    ```
 2. **Atualização:** Rode o mesmo comando acima. O instalador detectará a versão anterior e oferecerá o **Modo [U]pdate**, que atualiza os scripts e serviços preservando suas chaves de API (`.env`).
 3. O Bootstrap baixará o código e iniciará o Wizard (`install.py`). Siga as instruções na tela.
