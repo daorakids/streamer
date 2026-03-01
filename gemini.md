@@ -1,28 +1,26 @@
-# Projeto Daora Kids v2.2 📺🍿
+# Projeto Daora Kids v2.4 📺🍿
 
-**Status:** v2.2 Bootstrap na Raiz + Sincronização Web Ativada (Cérebro v2.1).
+**Status:** v2.4 Modo Update Inteligente + Monitoramento Real-Time (Cérebro v2.1).
 
 ## 🚀 Arquitetura Atual (Sincronização Remota)
 
-1.  **Instalação Bootstrap (`setup.sh`):**
-    - Arquivo movido para a raiz do projeto.
-    - Suporta instalação limpa com comando de uma linha (`curl | bash`), baixando o repositório completo antes de invocar o Wizard Python.
+1.  **Wizard de Instalação e Update (`install.py`):**
+    - **Modo [U]pdate:** Detecta instalações anteriores via `.env` e oferece atualização rápida de scripts sem perder chaves de API.
+    - **Gerenciamento de Serviços:** Para automaticamente a live e o sincronizador antes de atualizar, garantindo uma transição limpa.
+    - **Pós-Instalação:** Habilita serviços, agenda tarefas no Cron e executa `reboot` automático após 10 segundos.
 
-2.  **Cérebro Python (`cerebro.py`):**
+2.  **Monitor de Transmissão (`ver_live.sh`):**
+    - **Atalhos:** Aliases `ver` e `monitor` adicionados ao `.bashrc`.
+    - **Painel:** Abre automaticamente ao logar, mostrando Idioma, Modo e Logs consolidados (Live + Sync).
+    - **Filtro:** Esconde logs repetitivos do FFmpeg para focar em erros e trocas de vídeo.
+
+3.  **Instalação Bootstrap (`setup.sh`):**
+    - Corrigido: Agora usa `cp -a` para incluir arquivos ocultos (ex: `.bashrc`, `.env`).
+    - Exige privilégios de `sudo` para instalação completa de dependências e usuários.
+
+4.  **Cérebro Python (`cerebro.py`):**
     - **Sincronização 5-5min:** Baixa `schedule.json` da web com validação de formato.
-    - **Detecção de Mudança:** Se o slot atual (Idioma, Modo ou Chave) mudar, reinicia a live gentilmente via `pkill -f ffmpeg`.
-    - **Case Insensitive:** A busca pelas pastas de vídeo no pendrive ignora maiúsculas/minúsculas.
-    - **Resiliência Offline:** Se o servidor estiver fora, usa a última versão salva localmente.
-
-3.  **Sincronização de Vídeos (`daorakids-sync.service`):**
-    - Sincroniza arquivos `.mp4` a cada hora.
-    - **Sync-On-Demand:** O Cérebro dispara uma sincronização imediata se o idioma da agenda for alterado.
-
-4.  **Streaming Bash (`iniciar_live.sh`):**
-    - Loop resiliente que reage às mudanças do Cérebro via `.current_config`.
-
-5.  **Manutenção e Saúde:**
-    - Notificações de Alerta e Status no Telegram (IP, Idioma e Modo).
+    - **Detecção de Mudança:** Se o slot mudar, reinicia a live gentilmente via `pkill -f ffmpeg`.
 
 ---
-**Atualizado em:** 28 de Fevereiro de 2026 por Gemini CLI.
+**Atualizado em:** 01 de Março de 2026 por Gemini CLI.

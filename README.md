@@ -2,14 +2,24 @@
 
 Sistema de Streaming Kids 24/7 (Raspberry Pi 3) - Blindado e Totalmente Remoto.
 
-## 🚀 Como Instalar (Zero-Touch Setup)
+## 🚀 Como Instalar ou Atualizar (Zero-Touch Setup)
 
-1. Instale o **Raspberry Pi OS Legacy 64-Bit** (Lite).
-2. Conecte o Pi na rede, acesse via SSH e rode o comando (certifique-se de que o repositório é público):
+1. **Nova Instalação:** Instale o **Raspberry Pi OS Legacy 64-Bit** (Lite), conecte via SSH e rode:
    ```bash
-   curl -sSL https://raw.githubusercontent.com/daorakids/streamer/main/setup.sh > setup.sh && bash setup.sh
+   curl -sSL https://raw.githubusercontent.com/daorakids/streamer/main/setup.sh > setup.sh && sudo bash setup.sh
    ```
-3. O Bootstrap baixará o código e iniciará o Wizard (`install.py`). Siga as instruções na tela (Chaves, Telegram, Servidor).
+2. **Atualização:** Rode o mesmo comando acima. O instalador detectará a versão anterior e oferecerá o **Modo [U]pdate**, que atualiza os scripts e serviços preservando suas chaves de API (`.env`).
+3. O Bootstrap baixará o código e iniciará o Wizard (`install.py`). Siga as instruções na tela.
+
+## 📺 Monitoramento em Tempo Real
+
+O sistema agora conta com um painel de monitoramento amigável que inicia automaticamente ao fazer login no terminal (SSH ou HDMI).
+
+- **Comando Rápido:** Digite `ver` ou `monitor` a qualquer momento para ver o status da transmissão.
+- **O que ele mostra:** 
+  - Idioma atual e Modo de exibição.
+  - Logs da Live (FFmpeg), Cérebro (Agenda) e Sincronizador (Download de vídeos).
+  - Filtro inteligente que remove o ruído do FFmpeg para focar em eventos importantes.
 
 ## 🧠 Arquitetura (Cérebro + Bash)
 

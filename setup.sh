@@ -43,7 +43,7 @@ fi
 
 # 6. Distribuição de arquivos
 echo "🚚 Movendo arquivos para os locais de destino..."
-cp -r $TEMP_DIR/home/stream/* $BASE_DIR/
+cp -a $TEMP_DIR/home/stream/. $BASE_DIR/
 if [ -d "$TEMP_DIR/etc" ]; then
     cp -r $TEMP_DIR/etc/* /etc/
 fi

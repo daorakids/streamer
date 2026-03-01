@@ -54,12 +54,13 @@ if ! shopt -oq posix; then
 fi
 
 # =================================================
-# PAINEL DAORA KIDS - APARECE EM TUDO (SSH/PUTTY E HDMI)
+# ATALHOS DAORA KIDS
 # =================================================
-# Limpa a tela para dar destaque ao painel
-clear
+alias ver="/home/stream/ver_live.sh"
+alias monitor="/home/stream/ver_live.sh"
 
-# O 'EOF' entre aspas simples evita erros com as crases do desenho
+# Painel de Controle - Daora Kids (Melhorado com o alias 'ver')
+clear
 cat << 'EOF'
   ____                          _  ___     _      
  |  _ \  __ _  ___  _ __ __ _  | |/ (_) __| |___  
@@ -71,10 +72,10 @@ EOF
 echo "================================================="
 echo " 📺 PAINEL DE CONTROLE - DAORA KIDS 24H "
 echo "================================================="
-echo "▶ Status: Sistema Operacional e Live em execução."
+echo "▶ DIGITE: 'ver' ou 'monitor' para ver a live agora."
 echo "▶ DICA: Pressione Ctrl+C para liberar o terminal."
+echo "-------------------------------------------------"
 echo " "
 
-# Mostra os logs do serviço daora kids [cite: 1, 9]
-# O --line-buffered garante o tempo real 
-journalctl -u daorakids-live.service -f | grep --line-buffered -v "frame="
+# Inicia o monitor automaticamente ao logar
+/home/stream/ver_live.sh
