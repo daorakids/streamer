@@ -18,9 +18,15 @@ fi
 
 echo "🔄 Iniciando Setup do Sistema (isso pode demorar alguns minutos)..."
 
-# 2. Instalar Git e dependências essenciais primeiro
-apt-get update
-apt-get install -y git python3-pip curl python3-dotenv python3-requests ffmpeg
+# 2. Instalar dependências essenciais apenas se necessário
+echo "📦 Verificando dependências (git, ffmpeg, python3)..."
+if ! command -v git &>/dev/null || ! command -v ffmpeg &>/dev/null; then
+    echo "   ▶ Instalando pacotes faltantes (isso pode demorar um pouco)..."
+    apt-get update -qq
+    apt-get install -y -qq git python3-pip curl python3-dotenv python3-requests ffmpeg
+else
+    echo "   ✅ Dependências básicas já instaladas."
+fi
 
 # 3. Criar usuário 'stream' se não existir
 if ! id "stream" &>/dev/null; then
