@@ -109,7 +109,19 @@ ExecStart=/usr/bin/wget --user={sync_user} --password={sync_pass} -c -N -r -np -
             with open(bashrc_path, "a") as f_append:
                 f_append.write(monitor_cmd)
 
-    # 10. Auto-login e Outros
+    # 10. Auto-login e Outros (Forçar usuário 'stream' no terminal)
+    print("👤 Configurando auto-login para o usuário 'stream'...")
+    autologin_dir = "/etc/systemd/system/getty@tty1.service.d"
+    run_cmd(f"mkdir -p {autologin_dir}", sudo=True)
+    
+    autologin_conf = """[Service]
+ExecStart=
+ExecStart=-/sbin/agetty --autologin stream --noclear %I $TERM
+"""
+    with open("/tmp/autologin.conf", "w") as f:
+        f.write(autologin_conf)
+    run_cmd(f"cp /tmp/autologin.conf {autologin_dir}/autologin.conf", sudo=True)
+
     run_cmd("systemctl daemon-reload", sudo=True)
     run_cmd("systemctl enable --now daorakids-sync.timer", sudo=True)
     run_cmd("systemctl enable --now daorakids-live.service", sudo=True)

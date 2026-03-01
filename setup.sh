@@ -62,3 +62,9 @@ sudo -u stream python3 $BASE_DIR/install.py < /dev/tty
 # 9. Limpeza final
 rm -rf $TEMP_DIR
 echo "✅ Setup concluído com sucesso!"
+echo " "
+echo "⚠️ ATENÇÃO: Para entrar no terminal do Streamer agora mesmo, digite:"
+echo "   sudo su - stream"
+echo " "
+echo "🚀 Após o reboot automático (pelo install.py), o sistema entrará direto no usuário 'stream'."
+echo " "
