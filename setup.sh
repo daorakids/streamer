@@ -4,10 +4,16 @@
 #  🚀 BOOTSTRAP DAORA KIDS LIVE 24H (v2.7)
 # ===============================================
 
-# 1. Verificar Privilégios
+# 1. Verificar Privilégios e Estado do Disco
 if [ "$(id -u)" -ne 0 ]; then
     echo "🚨 Por favor, rode com sudo: sudo bash setup.sh"
     exit 1
+fi
+
+echo "🛡️ Verificando integridade do disco..."
+mount -o remount,rw / 2>/dev/null
+if [ $? -ne 0 ]; then
+    echo "⚠️ AVISO: Não foi possível remontar como RW. O disco pode estar corrompido ou protegido."
 fi
 
 echo "🔄 Iniciando Setup do Sistema (isso pode demorar alguns minutos)..."
