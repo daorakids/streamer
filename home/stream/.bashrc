@@ -58,6 +58,7 @@ fi
 # =================================================
 alias ver="/home/stream/ver_live.sh"
 alias monitor="/home/stream/ver_live.sh"
+alias log="/home/stream/ver_live.sh"
 
 # Painel de Controle - Daora Kids (Melhorado com o alias 'ver')
 clear
