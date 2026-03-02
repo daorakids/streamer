@@ -1,14 +1,14 @@
-# Projeto Daora Kids v2.8.24 📺🍿
+# Projeto Daora Kids v2.8.25 📺🍿
 
-**Status:** v2.8.24 - Diagnóstico Honesto e Credenciais de Sync.
+**Status:** v2.8.25 - Prontidão Total e Wget Inteligente (Fim dos re-downloads).
 
 ## 🚀 Arquitetura Atual (Sincronização Remota)
 
-1.  **Auto-login & Sistema (Mega Bootstrap v2.8.24):**
-    - **Bootstrap Único:** Instalação blindada e independente de cache.
-    - **Credenciais de Sync:** Registro automático de usuário/senha no `.env` para wget e agenda.
-    - **Diagnóstico Honesto:** Diferenciação clara entre "Fora de Horário" e "Pasta Faltando" nos logs.
-    - **Pastas Case-Insensitive:** Busca robusta no pendrive ignorando maiúsculas/minúsculas.
+1.  **Auto-login & Sistema (Mega Bootstrap v2.8.25):**
+    - **Prontidão Total:** Cérebro agora aguarda o download de todas as pastas (PT, EN, ES) antes de iniciar a primeira transmissão.
+    - **Wget Inteligente:** Fim dos downloads repetitivos e falsos positivos no pendrive (FAT32/exFAT).
+    - **Credenciais de Sync:** Registro automático de usuário/senha no `.env`.
+    - **Diagnóstico Honesto:** Mensagens claras para "Pasta Faltando" vs "Fora de Horário".
 
 2.  **Monitor de Transmissão (`ver_live.sh`):**
     - **Dashboard HDMI:** Inicia sozinho no boot físico com tela limpa.
