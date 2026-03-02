@@ -16,11 +16,20 @@ def run_cmd(cmd, sudo=False, capture=False):
 
 def setup_wizard():
     print("\n" + "="*40)
-    print(" 🎨 INSTALADOR/UPDATER DAORA KIDS v2.8.18 ")
+    print(" 🎨 INSTALADOR/UPDATER DAORA KIDS v2.8.22 ")
     print("="*40 + "\n")
 
     BASE_DIR = "/home/stream"
     load_dotenv(os.path.join(BASE_DIR, ".env"))
+
+    # Pegar dados do .env
+    sync_url = os.getenv("SYNC_URL") or "https://daorakids.com.br/util/stream/"
+    sync_user = os.getenv("SYNC_USER") or "stream"
+    sync_pass = os.getenv("SYNC_PASS") or "stream"
+    
+    parsed_url = urlparse(sync_url)
+    path_parts = [p for p in parsed_url.path.split('/') if p]
+    cut_dirs = len(path_parts)
 
     # Parar serviços
     print("⏹ Parando servicos...")
@@ -32,9 +41,8 @@ def setup_wizard():
     
     # 2. EXPURGO HDMI (Opcao Nuclear)
     print("🧹 Expurgando cloud-init e mods...")
-    # Mata processos de atualização que podem estar rodando
     run_cmd("killall apt apt-get dpkg", sudo=True)
-    run_cmd("rm /var/lib/dpkg/lock*", sudo=True)
+    run_cmd("rm -f /var/lib/dpkg/lock*", sudo=True)
     run_cmd("DEBIAN_FRONTEND=noninteractive apt-get purge -y --allow-remove-essential cloud-init rpi-cloud-init-mods", sudo=True)
     run_cmd("rm -rf /etc/cloud /var/lib/cloud", sudo=True)
 
@@ -56,15 +64,14 @@ def setup_wizard():
         run_cmd(f'echo "{line}" | sudo tee -a /etc/fstab', sudo=False)
         run_cmd("mount -a", sudo=True)
 
-    # 4. AUTO-LOGIN FORCADO (Direct Write)
+    # 4. AUTO-LOGIN FORCADO
     print("🖥️  Forcando Auto-login no console (HDMI)...")
     run_cmd("mkdir -p /etc/systemd/system/getty@tty1.service.d", sudo=True)
     conf_content = "[Service]\nExecStart=\nExecStart=-/sbin/agetty --autologin stream --noclear %I $TERM\n"
     with open("/tmp/autologin.conf", "w") as f: f.write(conf_content)
     run_cmd("cp /tmp/autologin.conf /etc/systemd/system/getty@tty1.service.d/autologin.conf", sudo=True)
-    run_cmd("systemctl daemon-reload", sudo=True)
 
-    # 5. REBUILD CMDLINE (Limpeza Total)
+    # 5. REBUILD CMDLINE
     print("🔇 Reconstruindo boot silencioso...")
     cmdline_path = "/boot/firmware/cmdline.txt"
     if not os.path.exists(cmdline_path): cmdline_path = "/boot/cmdline.txt"
@@ -77,17 +84,50 @@ def setup_wizard():
         with open("/tmp/cmdline.txt", "w") as f: f.write(new_line + "\n")
         run_cmd(f"cp /tmp/cmdline.txt {cmdline_path}", sudo=True)
 
-    # 6. Servicos
-    print("⚙️  Ativando servicos...")
-    run_cmd("systemctl daemon-reload", sudo=True)
-    for srv in ["daorakids-cerebro.timer", "daorakids-sync.timer", "daorakids-live.service"]:
-        run_cmd(f"systemctl enable {srv}", sudo=True)
-        run_cmd(f"systemctl start {srv}", sudo=True)
+    # 6. Servicos Systemd (Otimizados v2.8.22)
+    print("⚙️  Configurando servicos do systemd...")
+    
+    sync_service = f"""[Unit]
+Description=Daora Kids Sync Service
+After=network-online.target mnt-videos.mount
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=stream
+ExecStart=/usr/bin/wget --user={sync_user} --password={sync_pass} -c -N -r -np -nH --cut-dirs={cut_dirs} -A mp4 --tries=10 --no-verbose --no-if-modified-since -P /mnt/videos {sync_url}
+Restart=on-failure
+RestartSec=60s
+
+[Install]
+WantedBy=multi-user.target
+"""
+    with open("/tmp/daorakids-sync.service", "w") as f: f.write(sync_service)
+    run_cmd("cp /tmp/daorakids-sync.service /etc/systemd/system/daorakids-sync.service", sudo=True)
+
+    live_service = """[Unit]
+Description=Daora Kids Live Streaming Service
+After=network-online.target mnt-videos.mount
+Requires=mnt-videos.mount
+
+[Service]
+Type=simple
+User=stream
+WorkingDirectory=/home/stream
+ExecStart=/bin/bash /home/stream/iniciar_live.sh
+Restart=always
+RestartSec=10s
+
+[Install]
+WantedBy=multi-user.target
+"""
+    with open("/tmp/daorakids-live.service", "w") as f: f.write(live_service)
+    run_cmd("cp /tmp/daorakids-live.service /etc/systemd/system/daorakids-live.service", sudo=True)
 
     # 7. Dashboard .bashrc
     bashrc_path = "/home/stream/.bashrc"
     bashrc_addon = """
-# --- DAORA KIDS DASHBOARD v2.8.18 ---
+# --- DAORA KIDS DASHBOARD v2.8.22 ---
 alias ver='/home/stream/ver_live.sh'
 alias log='sudo journalctl -u daorakids-live.service -u daorakids-cerebro.service -u daorakids-sync.service -f'
 alias monitor='/home/stream/ver_live.sh'
@@ -100,7 +140,17 @@ fi
     run_cmd(f"sed -i '/DAORA KIDS/,/fi/d' {bashrc_path}", sudo=True)
     with open(bashrc_path, "a") as f_a: f_a.write(bashrc_addon)
 
-    print("\n✅ Setup v2.8.18 concluído! Reiniciando em 5s...")
+    print("⚙️  Ativando servicos...")
+    run_cmd("systemctl daemon-reload", sudo=True)
+    for srv in ["daorakids-cerebro.timer", "daorakids-sync.timer", "daorakids-live.service"]:
+        run_cmd(f"systemctl enable {srv}", sudo=True)
+        run_cmd(f"systemctl start {srv}", sudo=True)
+
+    # Roda o Cérebro uma vez
+    print("🧠 Inicializando Cerebro...")
+    run_cmd(f"sudo -u stream /usr/bin/python3 {BASE_DIR}/cerebro.py")
+    
+    print("\n✅ Setup v2.8.22 concluído! Reiniciando em 5s...")
     run_cmd("sync", sudo=True)
     time.sleep(5)
     run_cmd("reboot", sudo=True)

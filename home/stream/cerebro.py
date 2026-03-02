@@ -48,10 +48,20 @@ def find_video_dir(lang):
     if not os.path.exists(VIDEO_ROOT):
         log_debug(f"🚨 PASTA RAIZ NAO EXISTE: {VIDEO_ROOT}")
         return None
-    lang_lower = lang.lower()
-    for item in os.listdir(VIDEO_ROOT):
-        if item.lower() == lang_lower and os.path.isdir(os.path.join(VIDEO_ROOT, item)):
-            return os.path.join(VIDEO_ROOT, item)
+    
+    lang_search = lang.lower().strip()
+    log_debug(f"📂 Procurando pasta para o idioma: '{lang_search}'...")
+    
+    try:
+        items = os.listdir(VIDEO_ROOT)
+        for item in items:
+            path = os.path.join(VIDEO_ROOT, item)
+            if os.path.isdir(path) and item.lower().strip() == lang_search:
+                log_debug(f"   ✅ Pasta encontrada: '{item}'")
+                return path
+    except Exception as e:
+        log_debug(f"❌ Erro ao listar {VIDEO_ROOT}: {e}")
+        
     return None
 
 def update_schedule_from_web():
