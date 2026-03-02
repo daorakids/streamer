@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # ===============================================
-#  🚀 BOOTSTRAP DAORA KIDS LIVE 24H (v2.8.7)
+#  🚀 BOOTSTRAP DAORA KIDS LIVE 24H (v2.8.8)
 # ===============================================
 
 # 1. Verificar Privilégios e Estado do Disco
@@ -75,7 +75,7 @@ chmod +x $BASE_DIR/*.sh
 chmod +x $BASE_DIR/*.py
 
 # 8. Wizard de Configuração em BASH (Pensando fora da caixa - Máxima estabilidade)
-echo -e "\n\033[1;32m🎨 CONFIGURAÇÃO DAORA KIDS v2.8.7\033[0m"
+echo -e "\n\033[1;32m🎨 CONFIGURAÇÃO DAORA KIDS v2.8.8\033[0m"
 
 ENV_FILE="$BASE_DIR/.env"
 

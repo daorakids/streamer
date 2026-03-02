@@ -28,7 +28,7 @@ def get_input(prompt, required=True):
 
 def setup_wizard():
     print("\n" + "="*40)
-    print(" 🎨 INSTALADOR/UPDATER DAORA KIDS v2.8.7 ")
+    print(" 🎨 INSTALADOR/UPDATER DAORA KIDS v2.8.8 ")
     print("="*40 + "\n")
 
     # Detecta se é Update ou Nova Instalação
@@ -201,10 +201,21 @@ WantedBy=multi-user.target
     run_cmd("cp /tmp/daorakids-logs /etc/sudoers.d/daorakids-logs", sudo=True)
     
     bashrc_path = "/home/stream/.bashrc"
+    bashrc_addon = """
+# --- DAORA KIDS AUTO-MONITOR ---
+alias ver='/home/stream/ver_live.sh'
+alias log='sudo journalctl -u daorakids-live.service -f'
+alias monitor='/home/stream/ver_live.sh'
+
+# Inicia o monitor automaticamente apenas no terminal físico (HDMI)
+if [ "$(tty)" = "/dev/tty1" ]; then
+    /home/stream/ver_live.sh
+fi
+"""
     with open(bashrc_path, "r") as f:
-        if "ver_live.sh" not in f.read():
+        if "DAORA KIDS AUTO-MONITOR" not in f.read():
             with open(bashrc_path, "a") as f_a:
-                f_a.write("\n/home/stream/ver_live.sh\n")
+                f_a.write(bashrc_addon)
 
     # 10. Auto-login & Log2Ram
     autologin_dir = "/etc/systemd/system/getty@tty1.service.d"
