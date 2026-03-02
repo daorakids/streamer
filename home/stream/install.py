@@ -26,17 +26,12 @@ def get_input(prompt, required=True):
 
 def setup_wizard():
     print("\n" + "="*40)
-    print(" 🎨 INSTALADOR/UPDATER DAORA KIDS v2.8 (Blindado) ")
+    print(" 🎨 INSTALADOR/UPDATER DAORA KIDS v2.8.2 ")
     print("="*40 + "\n")
 
-    is_update = False
-    if os.path.exists("/home/stream/.env"):
-        choice = input("⚠️  Instalação detectada! Deseja [U] Atualizar Scripts ou [R] Reinstalar tudo? (U/R): ").strip().lower()
-        if choice == 'u':
-            is_update = True
-            print("🚀 Modo Update: Preservando configurações e atualizando serviços...")
-        else:
-            print("🧹 Modo Reinstalação: Solicitando novas configurações...")
+    # Detecta se é Update ou Nova Instalação
+    is_update = os.path.exists("/home/stream/.env")
+    load_dotenv("/home/stream/.env")
 
     # Parar serviços antes de mexer
     print("⏹ Parando serviços para manutenção...")
@@ -44,7 +39,7 @@ def setup_wizard():
     run_cmd("pkill -f ffmpeg", sudo=True)
 
     if not is_update:
-        # 1. DNS & YouTube
+        # 1. DNS
         print("🌐 Configurando DNS de backup (8.8.8.8, 1.1.1.1)...")
         dns_conf = "\nstatic domain_name_servers=8.8.8.8 1.1.1.1\n"
         try:
@@ -60,41 +55,10 @@ def setup_wizard():
         run_cmd("echo 'nameserver 8.8.8.8' | sudo tee /etc/resolv.conf", sudo=False)
         run_cmd("echo 'nameserver 1.1.1.1' | sudo tee -a /etc/resolv.conf", sudo=False)
 
-        print("\n🔔 AVISO: Digite as chaves do YouTube agora.")
-        yt_pt = get_input("Chave YouTube (PT): ")
-        yt_en = get_input("Chave YouTube (EN): ")
-        yt_es = get_input("Chave YouTube (ES): ")
-
-        # 2. Telegram
-        print("\n🔔 AVISO: Digite os dados do Telegram agora.")
-        tg_token = get_input("Token do Bot Telegram: ")
-        tg_chat_id = get_input("Chat ID do Telegram: ")
-
-        # 3. Sync Server
-        print("\n📂 Configurações de Sincronização de Vídeos:")
-        sync_url = get_input("URL do Servidor [https://daorakids.com.br/util/stream/]: ", required=False) or "https://daorakids.com.br/util/stream/"
-        sync_user = get_input("Usuário do Servidor [stream]: ", required=False) or "stream"
-        sync_pass = get_input("Senha do Servidor [stream]: ", required=False) or "stream"
-
-        # 5. Gerar .env
-        env_content = f"""YT_KEY_PT="{yt_pt}"
-YT_KEY_EN="{yt_en}"
-YT_KEY_ES="{yt_es}"
-TELEGRAM_TOKEN="{tg_token}"
-TELEGRAM_CHAT_ID="{tg_chat_id}"
-SYNC_URL="{sync_url}"
-SYNC_USER="{sync_user}"
-SYNC_PASS="{sync_pass}"
-"""
-        with open("/home/stream/.env", "w") as f:
-            f.write(env_content)
-        run_cmd("chown stream:stream /home/stream/.env", sudo=True)
-    else:
-        # Modo update
-        load_dotenv("/home/stream/.env")
-        sync_url = os.getenv("SYNC_URL")
-        sync_user = os.getenv("SYNC_USER")
-        sync_pass = os.getenv("SYNC_PASS")
+    # Pegar dados do .env (Já preenchido pelo setup.sh)
+    sync_url = os.getenv("SYNC_URL") or "https://daorakids.com.br/util/stream/"
+    sync_user = os.getenv("SYNC_USER") or "stream"
+    sync_pass = os.getenv("SYNC_PASS") or "stream"
 
     # Re-calcula cut_dirs
     parsed_url = urlparse(sync_url)

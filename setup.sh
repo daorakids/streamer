@@ -70,12 +70,53 @@ chown -R stream:stream $BASE_DIR
 chmod +x $BASE_DIR/*.sh
 chmod +x $BASE_DIR/*.py
 
-# 8. Execução INTERATIVA do Wizard
-echo -e "\a" # BEEP!
-echo "🐍 Iniciando Wizard de Configuração..."
-cd $BASE_DIR
-# Usamos o usuário stream para rodar o instalador com o TTY conectado
-sudo -u stream python3 $BASE_DIR/install.py < /dev/tty
+# 8. Wizard de Configuração em BASH (Pensando fora da caixa - Máxima estabilidade)
+echo -e "\n\033[1;32m🎨 CONFIGURAÇÃO DAORA KIDS v2.8.2\033[0m"
+
+ENV_FILE="$BASE_DIR/.env"
+
+if [ -f "$ENV_FILE" ]; then
+    read -p "⚠️  Instalação detectada! Deseja [U] Atualizar Scripts ou [R] Reinstalar tudo? (U/R): " choice
+    if [[ "$choice" =~ ^[Uu]$ ]]; then
+        echo "🚀 Modo Update: Preservando configurações..."
+        MODE="update"
+    fi
+fi
+
+if [ "$MODE" != "update" ]; then
+    echo -e "\n🔔 Digite as chaves do YouTube agora (obtidas no Painel de Transmissão):"
+    read -p "   Chave YT (PT): " yt_pt
+    read -p "   Chave YT (EN): " yt_en
+    read -p "   Chave YT (ES): " yt_es
+    
+    echo -e "\n🔔 Dados do Telegram (para avisos e monitoramento):"
+    read -p "   Token do Bot: " tg_token
+    read -p "   Chat ID:      " tg_chat_id
+    
+    echo -e "\n📂 Servidor de Sincronização:"
+    read -p "   URL [https://daorakids.com.br/util/stream/]: " sync_url
+    sync_url=${sync_url:-"https://daorakids.com.br/util/stream/"}
+    read -p "   Usuário [stream]: " sync_user
+    sync_user=${sync_user:-"stream"}
+    read -p "   Senha [stream]:   " sync_pass
+    sync_pass=${sync_pass:-"stream"}
+
+    # Criar .env
+    cat <<EOF > $ENV_FILE
+YT_KEY_PT="$yt_pt"
+YT_KEY_EN="$yt_en"
+YT_KEY_ES="$yt_es"
+TELEGRAM_TOKEN="$tg_token"
+TELEGRAM_CHAT_ID="$tg_chat_id"
+SYNC_URL="$sync_url"
+SYNC_USER="$sync_user"
+SYNC_PASS="$sync_pass"
+EOF
+    chown stream:stream $ENV_FILE
+fi
+
+echo -e "\n🐍 Rodando instalador técnico..."
+python3 $BASE_DIR/install.py --auto
 
 # 9. Limpeza final
 rm -rf $TEMP_DIR
