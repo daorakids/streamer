@@ -3,6 +3,8 @@ import os
 import subprocess
 import getpass
 import socket
+import datetime
+import time
 from urllib.parse import urlparse
 from dotenv import load_dotenv
 
@@ -11,6 +13,8 @@ def run_cmd(cmd, sudo=False):
     return subprocess.run(cmd, shell=True, capture_output=True, text=True)
 
 def get_input(prompt, required=True):
+    # Dá um "Beep" sutil para chamar a atenção no terminal
+    print("\a", end="", flush=True) 
     while True:
         val = input(prompt).strip()
         if required and not val:
@@ -20,21 +24,47 @@ def get_input(prompt, required=True):
 
 def setup_wizard():
     print("\n" + "="*40)
-    print(" 🎨 INSTALADOR/UPDATER DAORA KIDS v2.7 ")
+    print(" 🎨 INSTALADOR/UPDATER DAORA KIDS v2.8 (Blindado) ")
     print("="*40 + "\n")
 
-    # ... (bloco de detecção de update e parada de serviços mantido) ...
+    is_update = False
+    if os.path.exists("/home/stream/.env"):
+        choice = input("⚠️  Instalação detectada! Deseja [U] Atualizar Scripts ou [R] Reinstalar tudo? (U/R): ").strip().lower()
+        if choice == 'u':
+            is_update = True
+            print("🚀 Modo Update: Preservando configurações e atualizando serviços...")
+        else:
+            print("🧹 Modo Reinstalação: Solicitando novas configurações...")
+
+    # Parar serviços antes de mexer
+    print("⏹ Parando serviços para manutenção...")
+    run_cmd("systemctl stop daorakids-live.service daorakids-sync.service daorakids-sync.timer", sudo=True)
+    run_cmd("pkill -f ffmpeg", sudo=True)
 
     if not is_update:
         # 1. DNS & YouTube
         print("🌐 Configurando DNS de backup (8.8.8.8, 1.1.1.1)...")
-        # ... (DNS config mantido) ...
+        dns_conf = "\nstatic domain_name_servers=8.8.8.8 1.1.1.1\n"
+        try:
+            with open("/etc/dhcpcd.conf", "r") as f:
+                content = f.read()
+            if "static domain_name_servers" not in content:
+                with open("/tmp/dhcpcd.conf", "w") as tmp_f:
+                    tmp_f.write(content + dns_conf)
+                run_cmd("cp /tmp/dhcpcd.conf /etc/dhcpcd.conf", sudo=True)
+        except: pass
+        
+        # Força DNS imediato
+        run_cmd("echo 'nameserver 8.8.8.8' | sudo tee /etc/resolv.conf", sudo=False)
+        run_cmd("echo 'nameserver 1.1.1.1' | sudo tee -a /etc/resolv.conf", sudo=False)
 
+        print("\n🔔 AVISO: Digite as chaves do YouTube agora.")
         yt_pt = get_input("Chave YouTube (PT): ")
         yt_en = get_input("Chave YouTube (EN): ")
         yt_es = get_input("Chave YouTube (ES): ")
 
         # 2. Telegram
+        print("\n🔔 AVISO: Digite os dados do Telegram agora.")
         tg_token = get_input("Token do Bot Telegram: ")
         tg_chat_id = get_input("Chat ID do Telegram: ")
 
@@ -58,27 +88,23 @@ SYNC_PASS="{sync_pass}"
             f.write(env_content)
         run_cmd("chown stream:stream /home/stream/.env", sudo=True)
     else:
-        # No modo update, apenas carregamos os dados do .env existente
+        # Modo update
         load_dotenv("/home/stream/.env")
         sync_url = os.getenv("SYNC_URL")
         sync_user = os.getenv("SYNC_USER")
         sync_pass = os.getenv("SYNC_PASS")
 
-    # Re-calcula cut_dirs (importante se mudou a URL)
+    # Re-calcula cut_dirs
     parsed_url = urlparse(sync_url)
     path_parts = [p for p in parsed_url.path.split('/') if p]
     cut_dirs = len(path_parts)
 
-    # 6. Pendrive (Otimizado: Busca UUID para evitar erro de montagem)
+    # 6. Pendrive (Otimizado: Busca UUID)
     run_cmd("mkdir -p /mnt/videos", sudo=True)
-    
-    # Lemos o fstab uma única vez para evitar o bug do cursor no fim do arquivo
     with open("/etc/fstab", "r") as f:
         fstab_content = f.read()
 
-    # Tenta descobrir o UUID do pendrive sda1
     uuid_raw = run_cmd("blkid -s UUID -o value /dev/sda1").stdout.strip()
-    
     if uuid_raw and uuid_raw not in fstab_content:
         line = f"\nUUID={uuid_raw} /mnt/videos auto nosuid,nodev,nofail,x-gvfs-show,umask=000,flush,noatime 0 0\n"
         with open("/tmp/fstab", "w") as tmp_f:
@@ -86,17 +112,15 @@ SYNC_PASS="{sync_pass}"
         run_cmd("cp /tmp/fstab /etc/fstab", sudo=True)
         run_cmd("systemctl daemon-reload", sudo=True)
     elif not uuid_raw and "/dev/sda1" not in fstab_content:
-        # Fallback para /dev/sda1
         line = "\n/dev/sda1 /mnt/videos auto nosuid,nodev,nofail,x-gvfs-show,umask=000,flush,noatime 0 0\n"
         with open("/tmp/fstab", "w") as tmp_f:
             tmp_f.write(fstab_content + line)
         run_cmd("cp /tmp/fstab /etc/fstab", sudo=True)
         run_cmd("systemctl daemon-reload", sudo=True)
-    
     run_cmd("mount -a", sudo=True)
 
-    # 6.1 Ativar Hardware Watchdog
-    print("🐕 Ativando Hardware Watchdog (Proteção contra travamentos)...")
+    # 6.1 Hardware Watchdog
+    print("🐕 Ativando Hardware Watchdog...")
     run_cmd("modprobe bcm2835_wdt", sudo=True)
     with open("/etc/modules", "r") as f:
         if "bcm2835_wdt" not in f.read():
@@ -104,10 +128,9 @@ SYNC_PASS="{sync_pass}"
     run_cmd("apt-get install -y watchdog", sudo=True)
     run_cmd('echo "watchdog-device = /dev/watchdog" | sudo tee -a /etc/watchdog.conf', sudo=False)
     run_cmd('echo "watchdog-timeout = 15" | sudo tee -a /etc/watchdog.conf', sudo=False)
-    run_cmd('echo "max-load-1 = 24" | sudo tee -a /etc/watchdog.conf', sudo=False)
     run_cmd("systemctl enable --now watchdog", sudo=True)
 
-    # 7. Sync Service
+    # 7. Serviços
     sync_service = f"""[Unit]
 Description=Sincroniza videos do site para o Pi
 After=network-online.target
@@ -124,7 +147,6 @@ RestartSec=30s
         f.write(sync_service)
     run_cmd("cp /tmp/daorakids-sync.service /etc/systemd/system/daorakids-sync.service", sudo=True)
 
-    # 7.1 Live Service
     live_service = """[Unit]
 Description=Daora Kids Live Streaming Service
 After=network-online.target mnt-videos.mount
@@ -145,50 +167,38 @@ WantedBy=multi-user.target
         f.write(live_service)
     run_cmd("cp /tmp/daorakids-live.service /etc/systemd/system/daorakids-live.service", sudo=True)
 
-    # 8. Sudo sem senha para journalctl
-    sudo_rule = "stream ALL=(ALL) NOPASSWD: /usr/bin/journalctl"
-    with open("/tmp/daorakids-logs", "w") as f:
-        f.write(sudo_rule)
-    run_cmd("cp /tmp/daorakids-logs /etc/sudoers.d/daorakids-logs", sudo=True)
-
-    # 9. Monitoramento Automático no Login
+    # 8. Logs & Monitor
+    run_cmd("cp /tmp/daorakids-logs /etc/sudoers.d/daorakids-logs", sudo=True) 2>/dev/null
+    
     bashrc_path = "/home/stream/.bashrc"
     with open(bashrc_path, "r") as f:
         if "ver_live.sh" not in f.read():
-            monitor_cmd = "\n# --- MONITORAMENTO AUTOMÁTICO DA LIVE ---\n/home/stream/ver_live.sh\n"
-            with open(bashrc_path, "a") as f_append:
-                f_append.write(monitor_cmd)
+            with open(bashrc_path, "a") as f_a:
+                f_a.write("\n/home/stream/ver_live.sh\n")
 
-    # 10. Auto-login e Outros
-    print("👤 Configurando auto-login para o usuário 'stream'...")
+    # 10. Auto-login & Log2Ram
     autologin_dir = "/etc/systemd/system/getty@tty1.service.d"
     run_cmd(f"mkdir -p {autologin_dir}", sudo=True)
-    autologin_conf = """[Service]
-ExecStart=
-ExecStart=-/sbin/agetty --autologin stream --noclear %I $TERM
-"""
     with open("/tmp/autologin.conf", "w") as f:
-        f.write(autologin_conf)
+        f.write("[Service]\nExecStart=\nExecStart=-/sbin/agetty --autologin stream --noclear %I $TERM\n")
     run_cmd(f"cp /tmp/autologin.conf {autologin_dir}/autologin.conf", sudo=True)
+
+    if not is_update:
+        choice = input("\n🛡️ Deseja instalar Log2Ram para proteger seu Cartão SD? (S/N): ").strip().lower()
+        if choice == 's':
+            print("📦 Instalando Log2Ram...")
+            run_cmd("curl -L https://github.com/azlux/log2ram/archive/master.tar.gz | tar zx && cd log2ram-master && sudo ./install.sh", sudo=False)
 
     run_cmd("systemctl daemon-reload", sudo=True)
     run_cmd("systemctl enable daorakids-sync.timer", sudo=True)
     run_cmd("systemctl enable daorakids-live.service", sudo=True)
     
-    # Cron
-    cron_jobs = f"""*/5 * * * * /usr/bin/python3 /home/stream/cerebro.py >> /home/stream/cerebro.log 2>&1
-00 01 * * * /bin/bash /home/stream/manutencao_diaria.sh >> /home/stream/manutencao.log 2>&1
-"""
-    with open("/tmp/mycron", "w") as f:
-        f.write(cron_jobs)
-    run_cmd("crontab -u stream /tmp/mycron", sudo=True)
-
-    print("\n✅ Operação concluída com sucesso!")
-    print("💾 Sincronizando e desmontando volumes com segurança...")
+    print("\n✅ Operação concluída!")
     run_cmd("sync", sudo=True)
     run_cmd("umount /mnt/videos", sudo=True)
-    print("🔄 O sistema irá reiniciar em 5 segundos...")
-    run_cmd("sleep 5 && sudo reboot", sudo=False)
+    print("🔄 Reiniciando em 5s...")
+    time.sleep(5)
+    run_cmd("reboot", sudo=True)
 
 if __name__ == "__main__":
     setup_wizard()

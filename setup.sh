@@ -66,9 +66,10 @@ chmod +x $BASE_DIR/*.sh
 chmod +x $BASE_DIR/*.py
 
 # 8. Execução INTERATIVA do Wizard
+echo -e "\a" # BEEP!
 echo "🐍 Iniciando Wizard de Configuração..."
 cd $BASE_DIR
-# Usamos o usuário stream para rodar o instalador
+# Usamos o usuário stream para rodar o instalador com o TTY conectado
 sudo -u stream python3 $BASE_DIR/install.py < /dev/tty
 
 # 9. Limpeza final
