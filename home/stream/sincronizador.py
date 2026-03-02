@@ -30,16 +30,26 @@ SYNC_PASS = os.getenv("SYNC_PASS", "stream")
 
 def get_remote_files(url, subfolder=""):
     files = []
+    full_url = url + subfolder
     try:
-        response = requests.get(url + subfolder, auth=HTTPBasicAuth(SYNC_USER, SYNC_PASS), timeout=20)
+        log(f"🔗 Acessando: {full_url}")
+        response = requests.get(full_url, auth=HTTPBasicAuth(SYNC_USER, SYNC_PASS), timeout=20)
+        
         if response.status_code == 401:
-            log(f"❌ ERRO 401: Usuario ou senha invalidos no .env!")
+            log(f"❌ ERRO 401: Usuario '{SYNC_USER}' ou senha invalidos!")
             return []
         if response.status_code != 200:
-            log(f"⚠️ Servidor respondeu com status {response.status_code} para {subfolder}")
+            log(f"⚠️ Servidor respondeu com status {response.status_code}")
             return []
         
+        # Procura por links .mp4 ou pastas (terminadas em /)
         links = re.findall(r'href="([^"]+)"', response.text)
+        
+        if not links:
+            log(f"⚠️ Alerta: Nenhum link encontrado na pagina HTML de {subfolder or 'root'}")
+            log(f"📝 Conteudo inicial da resposta: {response.text[:200]}...")
+            return []
+
         for link in links:
             if link.startswith('?') or link.startswith('/') or '..' in link: continue
             if link.endswith('/'):
@@ -47,11 +57,12 @@ def get_remote_files(url, subfolder=""):
             elif link.lower().endswith('.mp4'):
                 files.append(subfolder + link)
     except Exception as e:
-        log(f"⚠️ Erro ao listar servidor ({subfolder}): {e}")
+        log(f"⚠️ Erro de conexao em {full_url}: {e}")
     return files
 
 def main():
-    log(f"Iniciando Sincronizador v2.8.34 (Usuario: {SYNC_USER})")
+    log(f"Iniciando Sincronizador v2.8.35")
+    log(f"👤 Usuario: {SYNC_USER} | 🌍 Servidor: {SYNC_URL}")
     
     if not os.path.exists(VIDEO_ROOT):
         log(f"🚨 PASTA RAIZ NAO ENCONTRADA: {VIDEO_ROOT}")
