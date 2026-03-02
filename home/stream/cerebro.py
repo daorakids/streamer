@@ -37,149 +37,127 @@ WEB_SCHEDULE_URL = f"{SYNC_URL}/schedule.json"
 
 def find_video_dir(lang):
     if not os.path.exists(VIDEO_ROOT):
-        log_debug(f"🚨 PASTA RAIZ NAO EXISTE: {VIDEO_ROOT}")
         return None
     lang_search = lang.lower().strip()
-    log_debug(f"📂 Procurando pasta para o idioma: '{lang_search}'...")
     try:
         items = os.listdir(VIDEO_ROOT)
         for item in items:
             path = os.path.join(VIDEO_ROOT, item)
             if os.path.isdir(path) and item.lower().strip() == lang_search:
-                log_debug(f"   ✅ Pasta encontrada: '{item}'")
                 return path
-    except Exception as e:
-        log_debug(f"❌ Erro ao listar {VIDEO_ROOT}: {e}")
+    except: pass
     return None
 
+def check_all_languages_ready():
+    required = ["pt", "en", "es"]
+    missing = []
+    for lang in required:
+        if not find_video_dir(lang):
+            missing.append(lang.upper())
+    return missing
+
 def update_schedule_from_web():
-    log_debug(f"🌐 Tentando baixar agenda de: {WEB_SCHEDULE_URL}")
+    log_debug(f"🌐 Sincronizando agenda com o servidor...")
     try:
-        # Usa Autenticação Básica com os dados do .env
         response = requests.get(WEB_SCHEDULE_URL, timeout=15, auth=HTTPBasicAuth(SYNC_USER, SYNC_PASS))
-        log_debug(f"📡 Resposta do servidor: {response.status_code}")
         if response.status_code == 200:
             new_content = response.text
-            try:
-                json.loads(new_content) # Valida se é JSON
-            except ValueError:
-                log_debug("❌ Erro: O conteudo baixado nao e um JSON valido!")
-                return
-            if os.path.exists(SCHEDULE_PATH):
-                with open(SCHEDULE_PATH, 'r') as f:
-                    old_content = f.read()
-                if hashlib.md5(new_content.encode()).hexdigest() == hashlib.md5(old_content.encode()).hexdigest():
-                    log_debug("✅ Agenda ja esta atualizada.")
-                    return 
-            with open(SCHEDULE_PATH, 'w') as f:
-                f.write(new_content)
-            log_debug("✨ Nova agenda salva!")
-        else:
-            log_debug(f"⚠️ Erro {response.status_code} ao buscar agenda. Verifique usuario/senha.")
+            try: json.loads(new_content)
+            except: return
+            with open(SCHEDULE_PATH, 'w') as f: f.write(new_content)
+            log_debug("✅ Agenda atualizada.")
     except Exception as e:
-        log_debug(f"❌ Falha de rede ao buscar agenda: {e}")
+        log_debug(f"⚠️ Falha ao baixar agenda (usando local): {e}")
 
 def get_current_slot():
-    log_debug("📅 Analisando agenda local...")
     try:
-        if not os.path.exists(SCHEDULE_PATH):
-            log_debug(f"⚠️ {SCHEDULE_PATH} nao existe!")
-            return None
-        with open(SCHEDULE_PATH, 'r') as f:
-            data = json.load(f)
-    except Exception as e:
-        log_debug(f"❌ Erro ao ler JSON: {e}")
-        return None
+        if not os.path.exists(SCHEDULE_PATH): return None
+        with open(SCHEDULE_PATH, 'r') as f: data = json.load(f)
+    except: return None
 
-    if data.get("emergency_stop"):
-        log_debug("🛑 EMERGENCY STOP detectado!")
-        return {"lang": "STOP"}
+    if data.get("emergency_stop"): return {"lang": "STOP"}
 
     agora = datetime.datetime.now()
-    hoje_iso = agora.strftime("%Y-%m-%d")
     days_map = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
     hoje_dia = days_map[agora.weekday()]
     hora_atual = agora.strftime("%H:%M")
-    log_debug(f"⏰ Horario do Sistema: {hoje_dia} {hora_atual}")
 
     slot = None
     # 1. Datas especiais
-    special = data.get("special_dates", {}).get(hoje_iso)
+    special = data.get("special_dates", {}).get(agora.strftime("%Y-%m-%d"))
     if special:
         for s in special:
-            if s["start"] <= hora_atual <= s["end"]:
-                slot = s; break
+            if s["start"] <= hora_atual <= s["end"]: slot = s; break
     # 2. Agenda semanal
     if not slot:
         day_slots = data.get("schedule", {}).get(hoje_dia)
         if day_slots:
             for s in day_slots:
-                if s["start"] <= hora_atual <= s["end"]:
-                    slot = s; break
+                if s["start"] <= hora_atual <= s["end"]: slot = s; break
+    
     if not slot:
-        log_debug("💤 Fora do horario programado.")
+        log_debug(f"💤 Fora do horario (Relogio: {hora_atual})")
         return {"lang": "OFF"}
     
     lang_key = slot['lang'].lower()
     web_keys = data.get("stream_keys", {})
-    if lang_key in web_keys:
-        slot["key"] = web_keys[lang_key]
-    else:
-        slot["key"] = os.getenv(f"YT_KEY_{lang_key.upper()}")
+    slot["key"] = web_keys.get(lang_key, os.getenv(f"YT_KEY_{lang_key.upper()}"))
     return slot
 
 def main():
-    log_debug("--- INICIANDO CEREBRO v2.8.23 ---")
+    log_debug("--- INICIANDO CEREBRO v2.8.25 ---")
     update_schedule_from_web()
+    
+    # VALIDACAO DE PRONTIDAO (Sugestao do usuario)
+    missing = check_all_languages_ready()
+    if missing:
+        log_debug(f"⏳ Aguardando sincronismo inicial. Faltam: {', '.join(missing)}")
+        with open(CONFIG_FILE + ".error", 'w') as f:
+            f.write(f"Aguardando download inicial das pastas: {', '.join(missing)}")
+        if os.path.exists(CONFIG_FILE): os.remove(CONFIG_FILE)
+        return
+
     slot = get_current_slot()
     if not slot: return
 
     current_state = {}
     if os.path.exists(CURRENT_STATE_FILE):
         try:
-            with open(CURRENT_STATE_FILE, 'r') as f:
-                current_state = json.load(f)
+            with open(CURRENT_STATE_FILE, 'r') as f: current_state = json.load(f)
         except: pass
 
-    config_missing = not os.path.exists(CONFIG_FILE)
-    if slot != current_state or config_missing:
-        log_debug(f"🔄 Mudanca de estado (config faltando={config_missing})")
+    if slot != current_state or not os.path.exists(CONFIG_FILE):
+        log_debug(f"🔄 Ajustando transmissao para {slot.get('lang').upper()}...")
         target_lang = slot.get("lang", "OFF").lower()
         target_mode = slot.get("mode", "sequential")
         target_key = slot.get("key", "")
-        with open(CURRENT_STATE_FILE, 'w') as f:
-            json.dump(slot, f)
+        
+        with open(CURRENT_STATE_FILE, 'w') as f: json.dump(slot, f)
 
         if target_lang in ["stop", "off"]:
             if os.path.exists(CONFIG_FILE): os.remove(CONFIG_FILE)
-            log_debug("🛑 Modo OFF.")
         else:
             video_dir = find_video_dir(target_lang)
             if not video_dir:
-                log_debug(f"❌ ERRO CRITICO: Pasta de videos '{target_lang}' nao encontrada em {VIDEO_ROOT}!")
-                # Grava um arquivo temporario para o iniciar_live.sh saber o erro real
                 with open(CONFIG_FILE + ".error", 'w') as f:
-                    f.write(f"Pasta '{target_lang.upper()}' nao encontrada no pendrive.")
+                    f.write(f"Pasta '{target_lang.upper()}' sumiu do pendrive!")
                 if os.path.exists(CONFIG_FILE): os.remove(CONFIG_FILE)
                 return
             
-            # Limpa erro se a pasta foi achada
             if os.path.exists(CONFIG_FILE + ".error"): os.remove(CONFIG_FILE + ".error")
             
             try:
                 with open(CONFIG_FILE, 'w') as f:
-                    f.write(f'CHAVE="{target_key}"\n')
-                    f.write(f'PASTA_VIDEOS="{video_dir}"\n')
-                    f.write(f'MODO="{target_mode}"\n')
-                log_debug(f"✅ Config gravada!")
+                    f.write(f'CHAVE="{target_key}"\nPASTA_VIDEOS="{video_dir}"\nMODO="{target_mode}"\n')
+                log_debug(f"✅ Transmissao liberada!")
                 os.chmod(CONFIG_FILE, 0o777)
             except Exception as e:
                 log_debug(f"❌ Erro ao gravar config: {e}")
+        
         subprocess.run(["pkill", "-f", "ffmpeg"], stderr=subprocess.DEVNULL)
     else:
-        log_debug("😴 Sem alteracoes.")
+        log_debug("😴 Tudo em ordem. Transmitindo...")
 
 if __name__ == "__main__":
     try: main()
-    except Exception as e:
-        log_debug(f"💥 ERRO FATAL: {e}")
+    except Exception as e: log_debug(f"💥 ERRO: {e}")

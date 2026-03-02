@@ -84,7 +84,7 @@ def setup_wizard():
         with open("/tmp/cmdline.txt", "w") as f: f.write(new_line + "\n")
         run_cmd(f"cp /tmp/cmdline.txt {cmdline_path}", sudo=True)
 
-    # 6. Servicos Systemd (Otimizados v2.8.22)
+    # 6. Servicos Systemd (Otimizados v2.8.25)
     print("⚙️  Configurando servicos do systemd...")
     
     sync_service = f"""[Unit]
@@ -95,7 +95,7 @@ Wants=network-online.target
 [Service]
 Type=simple
 User=stream
-ExecStart=/usr/bin/wget --user={sync_user} --password={sync_pass} -c -N -r -np -nH --cut-dirs={cut_dirs} -A mp4 --tries=10 --no-verbose --no-if-modified-since -P /mnt/videos {sync_url}
+ExecStart=/usr/bin/wget --user={sync_user} --password={sync_pass} -c -N -r -np -nH --cut-dirs={cut_dirs} -A mp4 --tries=10 --no-verbose --no-if-modified-since --modify-window=2 -P /mnt/videos {sync_url}
 Restart=on-failure
 RestartSec=60s
 
