@@ -114,6 +114,13 @@ def get_current_slot():
     return slot
 
 def main():
+    # Dá um respiro inicial se o sistema acabou de bootar (evita erros de rede)
+    try:
+        with open("/proc/uptime", "r") as f:
+            uptime = float(f.readline().split()[0])
+            if uptime < 60: datetime.time.sleep(10) # Aguarda 10s se bootou há menos de 1 min
+    except: pass
+
     update_schedule_from_web()
     slot = get_current_slot()
     if not slot: return

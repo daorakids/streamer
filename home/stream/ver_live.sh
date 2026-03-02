@@ -12,8 +12,10 @@ echo " "
 echo "📌 [STATUS ATUAL]"
 if [ -f "/home/stream/.current_config" ]; then
     source "/home/stream/.current_config"
+    TEMP=$(vcgencmd measure_temp | cut -d'=' -f2)
     echo "   ▶ Idioma: ${PASTA_VIDEOS##*/}"
     echo "   ▶ Modo:   $MODO"
+    echo "   ▶ Temp:   $TEMP"
 else
     echo "   ▶ Status: Aguardando Cérebro..."
 fi

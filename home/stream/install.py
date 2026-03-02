@@ -82,17 +82,40 @@ SYNC_PASS="{sync_pass}"
     path_parts = [p for p in parsed_url.path.split('/') if p]
     cut_dirs = len(path_parts)
 
-    # 6. Pendrive (Otimizado para evitar corrupção)
-    usb_dev = "/dev/sda1" 
+    # 6. Pendrive (Otimizado: Busca UUID para evitar erro de montagem)
     run_cmd("mkdir -p /mnt/videos", sudo=True)
-    with open("/etc/fstab", "r") as f:
-        if usb_dev not in f.read():
-            # flush: grava dados imediatamente / noatime: reduz escritas no disco
-            line = f"\n{usb_dev} /mnt/videos auto nosuid,nodev,nofail,x-gvfs-show,umask=000,flush,noatime 0 0\n"
-            with open("/tmp/fstab", "w") as tmp_f:
-                tmp_f.write(f.read() + line)
-            run_cmd("cp /tmp/fstab /etc/fstab", sudo=True)
+    # Tenta descobrir o UUID do pendrive sda1
+    uuid_raw = run_cmd("blkid -s UUID -o value /dev/sda1").stdout.strip()
+    if uuid_raw:
+        with open("/etc/fstab", "r") as f:
+            if uuid_raw not in f.read():
+                line = f"\nUUID={uuid_raw} /mnt/videos auto nosuid,nodev,nofail,x-gvfs-show,umask=000,flush,noatime 0 0\n"
+                with open("/tmp/fstab", "w") as tmp_f:
+                    tmp_f.write(f.read() + line)
+                run_cmd("cp /tmp/fstab /etc/fstab", sudo=True)
+    else:
+        # Fallback para /dev/sda1 se o blkid falhar
+        usb_dev = "/dev/sda1"
+        with open("/etc/fstab", "r") as f:
+            if usb_dev not in f.read():
+                line = f"\n{usb_dev} /mnt/videos auto nosuid,nodev,nofail,x-gvfs-show,umask=000,flush,noatime 0 0\n"
+                with open("/tmp/fstab", "w") as tmp_f:
+                    tmp_f.write(f.read() + line)
+                run_cmd("cp /tmp/fstab /etc/fstab", sudo=True)
     run_cmd("mount -a", sudo=True)
+
+    # 6.1 Ativar Hardware Watchdog (Reinício Automático em Travamentos)
+    print("🐕 Ativando Hardware Watchdog (Proteção contra travamentos)...")
+    run_cmd("modprobe bcm2835_wdt", sudo=True)
+    with open("/etc/modules", "r") as f:
+        if "bcm2835_wdt" not in f.read():
+            run_cmd('echo "bcm2835_wdt" | sudo tee -a /etc/modules', sudo=False)
+    # Configura o watchdog para 15 segundos
+    run_cmd("apt-get install -y watchdog", sudo=True)
+    run_cmd('echo "watchdog-device = /dev/watchdog" | sudo tee -a /etc/watchdog.conf', sudo=False)
+    run_cmd('echo "watchdog-timeout = 15" | sudo tee -a /etc/watchdog.conf', sudo=False)
+    run_cmd('echo "max-load-1 = 24" | sudo tee -a /etc/watchdog.conf', sudo=False)
+    run_cmd("systemctl enable --now watchdog", sudo=True)
 
     # 7. Sync Service (Com retentativa automática e proteção de rede)
     sync_service = f"""[Unit]
