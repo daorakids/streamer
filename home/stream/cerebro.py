@@ -133,8 +133,8 @@ def main():
                 current_state = json.load(f)
         except: pass
 
-    # Se mudar qualquer coisa no slot (horário, modo, chave ou idioma), reinicia.
-    if slot != current_state:
+    # Se mudar qualquer coisa no slot ou se o arquivo de config sumiu, regera tudo.
+    if slot != current_state or not os.path.exists(CONFIG_FILE):
         target_lang = slot.get("lang", "OFF").lower()
         target_mode = slot.get("mode", "sequential")
         target_key = slot.get("key", "")
