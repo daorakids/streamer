@@ -1,19 +1,18 @@
-# Projeto Daora Kids v2.8.31 📺🍿
+# Projeto Daora Kids v2.8.32 📺🍿
 
-**Status:** v2.8.31 - Sincronismo Duplo (Boot + Hora Cheia) e Arquivos Físicos Garantidos.
+**Status:** v2.8.32 - Sincronizador Pro (X de Y) e Faxina Automática.
 
 ## 🚀 Arquitetura Atual (Sincronização Remota)
 
-1.  **Auto-login & Sistema (Mega Bootstrap v2.8.31):**
-    - **Sincronismo Inteligente:** O Pi agora sincroniza 2 min após o boot e repete exatamente no início de cada hora cheia.
-    - **Arquivos Físicos:** Serviços e timers agora possuem arquivos físicos no repositório para garantir instalação sem erros de recursos.
-    - **Dominação HDMI:** Expurgo total de cloud-init e mensagens de boot limpas.
-    - **Prontidão Total:** Live aguarda download de todas as pastas (PT, EN, ES) antes de iniciar.
+1.  **Auto-login & Sistema (Mega Bootstrap v2.8.32):**
+    - **Sincronizador Pro:** Novo script `sincronizador.py` que mapeia o servidor e fornece feedback em tempo real ("Arquivo X de Y").
+    - **Faxina Automática:** Remoção de arquivos locais que não existem mais no servidor (Mirroring real).
+    - **Sincronismo Duplo:** Boot + Hourly para garantir pendrive sempre em dia.
+    - **Dominação HDMI:** Boot 100% limpo e dashboard automático.
 
 2.  **Monitor de Transmissão (`ver_live.sh`):**
-    - **Comandos Globais:** `daora-start` e `daora-stop` para gestão fácil dos serviços.
-    - **HDMI Dashboard:** Tela preta limpa que inicia o monitor automaticamente.
-    - **Logs Consolidados:** `log` unificado (Live + Cerebro + Sync).
+    - **Comandos Globais:** `daora-start` e `daora-stop`.
+    - **Feedback Visual:** Log unificado agora mostra o progresso detalhado do download.
 
 
 2.  **Monitor de Transmissão (`ver_live.sh`):**
