@@ -65,33 +65,40 @@ def setup_wizard():
     path_parts = [p for p in parsed_url.path.split('/') if p]
     cut_dirs = len(path_parts)
 
-    # 6. Pendrive (Otimizado: Busca UUID)
+    # 6. Pendrive (Otimizado e Seguro)
     print("💾 Configurando montagem do Pendrive...")
     run_cmd("mkdir -p /mnt/videos", sudo=True)
     
-    with open("/etc/fstab", "r") as f:
-        fstab_content = f.read()
+    # Lê o fstab atual do sistema
+    try:
+        with open("/etc/fstab", "r") as f:
+            fstab_content = f.read()
+    except:
+        fstab_content = ""
 
-    # Busca UUID do sda1 (pendrive)
-    uuid_raw = run_cmd("blkid -s UUID -o value /dev/sda1").stdout.strip()
-    
-    # Se já existir alguma referência ao mountpoint, não adicionamos de novo
+    # SEGURO: Só mexemos no fstab se o ponto de montagem /mnt/videos NÃO existir
     if "/mnt/videos" not in fstab_content:
+        # Busca UUID do sda1 (pendrive)
+        uuid_raw = run_cmd("blkid -s UUID -o value /dev/sda1").stdout.strip()
+        
         line = ""
         if uuid_raw:
             print(f"   ✅ Pendrive encontrado (UUID: {uuid_raw})")
-            line = f"UUID={uuid_raw} /mnt/videos auto nosuid,nodev,nofail,x-gvfs-show,umask=000,flush,noatime 0 0\n"
+            line = f"\n# Montagem automatica do Pendrive Daora Kids\nUUID={uuid_raw} /mnt/videos auto nosuid,nodev,nofail,x-gvfs-show,umask=000,flush,noatime 0 0\n"
         else:
-            print("   ⚠️ Pendrive não detectado via UUID, usando /dev/sda1 genérico.")
-            line = "/dev/sda1 /mnt/videos auto nosuid,nodev,nofail,x-gvfs-show,umask=000,flush,noatime 0 0\n"
+            print("   ⚠️ Pendrive nao detectado, preparando entrada generica /dev/sda1.")
+            line = "\n# Montagem automatica do Pendrive Daora Kids\n/dev/sda1 /mnt/videos auto nosuid,nodev,nofail,x-gvfs-show,umask=000,flush,noatime 0 0\n"
         
         if line:
+            # APPEND SEGURO: Nunca sobrescreve, apenas anexa ao final
             with open("/tmp/fstab_append", "w") as tmp_f:
                 tmp_f.write(line)
             run_cmd("cat /tmp/fstab_append | sudo tee -a /etc/fstab", sudo=False)
-            run_cmd("systemctl daemon-reload", sudo=True)
+            print("   📝 Entrada adicionada ao fstab.")
+    else:
+        print("   ✅ O ponto de montagem /mnt/videos ja esta configurado. Pulando...")
     
-    print("   🚀 Montando unidades...")
+    run_cmd("systemctl daemon-reload", sudo=True)
     run_cmd("mount -a", sudo=True)
 
     # 6.1 Hardware Watchdog
