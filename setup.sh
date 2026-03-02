@@ -114,14 +114,20 @@ systemctl daemon-reload
 systemctl enable daorakids-cerebro.timer daorakids-sync.timer daorakids-live.service
 systemctl start daorakids-cerebro.timer
 
-# 10. Dashboard HDMI
-echo "📊 Configurando Dashboard..."
+# 10. Dashboard HDMI e Comandos Globais
+echo "📊 Configurando Dashboard e Atalhos..."
 BASHRC="/home/stream/.bashrc"
 sed -i '/DAORA KIDS/,/fi/d' $BASHRC
 cat <<EOF >> $BASHRC
-# --- DAORA KIDS DASHBOARD v2.8.27 ---
+# --- DAORA KIDS DASHBOARD v2.8.28 ---
 alias ver='/home/stream/ver_live.sh'
 alias log='sudo journalctl -u daorakids-live.service -u daorakids-cerebro.service -u daorakids-sync.service -f'
+alias monitor='/home/stream/ver_live.sh'
+
+# Comandos de Controle
+alias daora-stop='sudo systemctl stop daorakids-live.service daorakids-sync.timer daorakids-cerebro.timer && sudo pkill -f ffmpeg && echo "🛑 Sistema Daora Kids PARADO."'
+alias daora-start='sudo systemctl start daorakids-cerebro.timer daorakids-sync.timer daorakids-live.service && echo "🚀 Sistema Daora Kids INICIADO."'
+
 if [ "\$(tty)" = "/dev/tty1" ]; then
     sleep 3
     clear
@@ -129,7 +135,7 @@ if [ "\$(tty)" = "/dev/tty1" ]; then
 fi
 EOF
 
-echo -e "\n\033[1;32m✅ SUCESSO v2.8.27!\033[0m"
+echo -e "\n\033[1;32m✅ SUCESSO v2.8.28!\033[0m"
 echo "🔄 Reiniciando em 5 segundos..."
 sync
 sleep 5
