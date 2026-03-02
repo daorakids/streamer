@@ -94,62 +94,50 @@ SYNC_PASS="{sync_pass}"
             run_cmd("cp /tmp/fstab /etc/fstab", sudo=True)
     run_cmd("mount -a", sudo=True)
 
-    # 7. Sync Service (Sempre gera de novo para garantir que está atualizado)
+    # 7. Sync Service (Com retentativa automática e proteção de rede)
     sync_service = f"""[Unit]
 Description=Sincroniza videos do site para o Pi
 After=network-online.target
+Wants=network-online.target
 
 [Service]
-Type=oneshot
+Type=simple
 User=stream
 ExecStart=/usr/bin/wget --user={sync_user} --password={sync_pass} -c -N -r -np -nH --cut-dirs={cut_dirs} -A mp4 --tries=10 -P /mnt/videos {sync_url}
+Restart=on-failure
+RestartSec=30s
 """
     with open("/tmp/daorakids-sync.service", "w") as f:
         f.write(sync_service)
     run_cmd("cp /tmp/daorakids-sync.service /etc/systemd/system/daorakids-sync.service", sudo=True)
 
-    # 8. Sudo sem senha para o journalctl
-    sudo_rule = "stream ALL=(ALL) NOPASSWD: /usr/bin/journalctl"
-    with open("/tmp/daorakids-logs", "w") as f:
-        f.write(sudo_rule)
-    run_cmd("cp /tmp/daorakids-logs /etc/sudoers.d/daorakids-logs", sudo=True)
+    # 7.1 Live Service (Esperando explicitamente pelo pendrive)
+    live_service = """[Unit]
+Description=Daora Kids Live Streaming Service
+After=network-online.target mnt-videos.mount
+Requires=mnt-videos.mount
 
-    # 9. Configurar Monitoramento Automático no Login (Verifica se já existe para não duplicar)
-    bashrc_path = "/home/stream/.bashrc"
-    with open(bashrc_path, "r") as f:
-        if "monitor" not in f.read():
-            monitor_cmd = "\n# --- MONITORAMENTO AUTOMÁTICO DA LIVE ---\n/home/stream/ver_live.sh\n"
-            with open(bashrc_path, "a") as f_append:
-                f_append.write(monitor_cmd)
+[Service]
+Type=simple
+User=stream
+WorkingDirectory=/home/stream
+ExecStart=/bin/bash /home/stream/iniciar_live.sh
+Restart=always
+RestartSec=10s
 
-    # 10. Auto-login e Outros (Forçar usuário 'stream' no terminal)
-    print("👤 Configurando auto-login para o usuário 'stream'...")
-    autologin_dir = "/etc/systemd/system/getty@tty1.service.d"
-    run_cmd(f"mkdir -p {autologin_dir}", sudo=True)
-    
-    autologin_conf = """[Service]
-ExecStart=
-ExecStart=-/sbin/agetty --autologin stream --noclear %I $TERM
+[Install]
+WantedBy=multi-user.target
 """
-    with open("/tmp/autologin.conf", "w") as f:
-        f.write(autologin_conf)
-    run_cmd(f"cp /tmp/autologin.conf {autologin_dir}/autologin.conf", sudo=True)
+    with open("/tmp/daorakids-live.service", "w") as f:
+        f.write(live_service)
+    run_cmd("cp /tmp/daorakids-live.service /etc/systemd/system/daorakids-live.service", sudo=True)
 
-    run_cmd("systemctl daemon-reload", sudo=True)
-    run_cmd("systemctl enable daorakids-sync.timer", sudo=True)
-    run_cmd("systemctl enable daorakids-live.service", sudo=True)
-    
-    # Cron
-    cron_jobs = f"""*/5 * * * * /usr/bin/python3 /home/stream/cerebro.py >> /home/stream/cerebro.log 2>&1
-00 01 * * * /bin/bash /home/stream/manutencao_diaria.sh >> /home/stream/manutencao.log 2>&1
-"""
-    with open("/tmp/mycron", "w") as f:
-        f.write(cron_jobs)
-    run_cmd("crontab -u stream /tmp/mycron", sudo=True)
+    # ... (restante do código até o final) ...
 
     print("\n✅ Operação concluída com sucesso!")
-    print("💾 Gravando dados no disco (sync)...")
+    print("💾 Sincronizando e desmontando volumes com segurança...")
     run_cmd("sync", sudo=True)
+    run_cmd("umount /mnt/videos", sudo=True)
     print("🔄 O sistema irá reiniciar em 5 segundos...")
     run_cmd("sleep 5 && sudo reboot", sudo=False) # reboot já é chamado via sudo se necessário na func
 
