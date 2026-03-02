@@ -119,7 +119,7 @@ echo "📊 Configurando Dashboard e Atalhos..."
 BASHRC="/home/stream/.bashrc"
 sed -i '/DAORA KIDS/,/fi/d' $BASHRC
 cat <<EOF >> $BASHRC
-# --- DAORA KIDS DASHBOARD v2.8.28 ---
+# --- DAORA KIDS DASHBOARD v2.8.29 ---
 alias ver='/home/stream/ver_live.sh'
 alias log='sudo journalctl -u daorakids-live.service -u daorakids-cerebro.service -u daorakids-sync.service -f'
 alias monitor='/home/stream/ver_live.sh'
@@ -135,7 +135,7 @@ if [ "\$(tty)" = "/dev/tty1" ]; then
 fi
 EOF
 
-echo -e "\n\033[1;32m✅ SUCESSO v2.8.28!\033[0m"
+echo -e "\n\033[1;32m✅ SUCESSO v2.8.29!\033[0m"
 echo "🔄 Reiniciando em 5 segundos..."
 sync
 sleep 5

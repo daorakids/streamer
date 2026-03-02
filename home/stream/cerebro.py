@@ -158,6 +158,9 @@ def main():
     else:
         log_debug("😴 Tudo em ordem. Transmitindo...")
 
+    # Lembrete de comandos (Dica do Usuário)
+    print("\n💡 Use os comandos: 'log' para monitorar, 'daora-stop' para parar e 'daora-start' para iniciar o sistema.\n")
+
 if __name__ == "__main__":
     try: main()
     except Exception as e: log_debug(f"💥 ERRO: {e}")
