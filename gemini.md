@@ -1,14 +1,18 @@
-# Projeto Daora Kids v2.8.17 📺🍿
+# Projeto Daora Kids v2.8.22 📺🍿
 
-**Status:** v2.8.17 - Opção Nuclear HDMI v2: Purge total e reconstrução de boot.
+**Status:** v2.8.22 - Pastas Case-Insensitive e Sincronização Inteligente.
 
 ## 🚀 Arquitetura Atual (Sincronização Remota)
 
-1.  **Auto-login & Sistema (Wizard v2.8.17):**
-    - **Opção Nuclear HDMI:** Purge completo dos pacotes `cloud-init` e `rpi-cloud-init-mods` para limpar o console.
-    - **Rebuild Cirúrgico do Boot:** Reconstrução dinâmica do `cmdline.txt` para remover o bug `enable_hdmi=0` e forçar `quiet`.
-    - **Auto-login Inabalável:** Implementado via `raspi-config` oficial com troca cirúrgica de usuário para `stream`.
-    - **Cérebro v2.8.17:** Diagnóstico total e persistência de configuração.
+1.  **Auto-login & Sistema (Mega Bootstrap v2.8.22):**
+    - **Bootstrap Único:** Toda a lógica de instalação e dominação HDMI consolidada no `setup.sh`.
+    - **Pastas Robustas:** Busca de pastas de vídeo ignorando maiúsculas/minúsculas no pendrive.
+    - **Wget Otimizado:** Sincronização de vídeos mais rápida e com logs limpos.
+    - **Auto-login & HDMI:** Expurgo de cloud-init e override manual de Getty garantidos.
+
+2.  **Monitor de Transmissão (`ver_live.sh`):**
+    - **Dashboard HDMI:** Inicia sozinho no boot físico com tela limpa.
+    - **Logs Consolidados:** Comando `log` unificado (Live + Cerebro + Sync).
 
 
 2.  **Monitor de Transmissão (`ver_live.sh`):**
