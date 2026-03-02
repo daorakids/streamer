@@ -1,14 +1,14 @@
-# Projeto Daora Kids v2.8.22 📺🍿
+# Projeto Daora Kids v2.8.24 📺🍿
 
-**Status:** v2.8.22 - Pastas Case-Insensitive e Sincronização Inteligente.
+**Status:** v2.8.24 - Diagnóstico Honesto e Credenciais de Sync.
 
 ## 🚀 Arquitetura Atual (Sincronização Remota)
 
-1.  **Auto-login & Sistema (Mega Bootstrap v2.8.22):**
-    - **Bootstrap Único:** Toda a lógica de instalação e dominação HDMI consolidada no `setup.sh`.
-    - **Pastas Robustas:** Busca de pastas de vídeo ignorando maiúsculas/minúsculas no pendrive.
-    - **Wget Otimizado:** Sincronização de vídeos mais rápida e com logs limpos.
-    - **Auto-login & HDMI:** Expurgo de cloud-init e override manual de Getty garantidos.
+1.  **Auto-login & Sistema (Mega Bootstrap v2.8.24):**
+    - **Bootstrap Único:** Instalação blindada e independente de cache.
+    - **Credenciais de Sync:** Registro automático de usuário/senha no `.env` para wget e agenda.
+    - **Diagnóstico Honesto:** Diferenciação clara entre "Fora de Horário" e "Pasta Faltando" nos logs.
+    - **Pastas Case-Insensitive:** Busca robusta no pendrive ignorando maiúsculas/minúsculas.
 
 2.  **Monitor de Transmissão (`ver_live.sh`):**
     - **Dashboard HDMI:** Inicia sozinho no boot físico com tela limpa.

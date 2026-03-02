@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # ===============================================
-#  🚀 SUPER-BOOTSTRAP DAORA KIDS LIVE (v2.8.23)
+#  🚀 SUPER-BOOTSTRAP DAORA KIDS LIVE (v2.8.24)
 #  (Credentials & Sync Fix)
 # ===============================================
 
@@ -12,7 +12,7 @@ if [ "$(id -u)" -ne 0 ]; then
 fi
 
 clear
-echo -e "\033[1;32m🎨 INICIANDO DOMINAÇÃO HDMI v2.8.23\033[0m"
+echo -e "\033[1;32m🎨 INICIANDO DOMINAÇÃO HDMI v2.8.24\033[0m"
 
 # 2. Garantir Sudoers para o usuário stream
 echo "👤 Configurando privilegios do usuario stream..."
@@ -114,7 +114,7 @@ echo "📊 Configurando Dashboard..."
 BASHRC="/home/stream/.bashrc"
 sed -i '/DAORA KIDS/,/fi/d' $BASHRC
 cat <<EOF >> $BASHRC
-# --- DAORA KIDS DASHBOARD v2.8.23 ---
+# --- DAORA KIDS DASHBOARD v2.8.24 ---
 alias ver='/home/stream/ver_live.sh'
 alias log='sudo journalctl -u daorakids-live.service -u daorakids-cerebro.service -u daorakids-sync.service -f'
 if [ "\$(tty)" = "/dev/tty1" ]; then
@@ -124,7 +124,7 @@ if [ "\$(tty)" = "/dev/tty1" ]; then
 fi
 EOF
 
-echo -e "\n\033[1;32m✅ SUCESSO v2.8.23!\033[0m"
+echo -e "\n\033[1;32m✅ SUCESSO v2.8.24!\033[0m"
 echo "🔄 Reiniciando em 5 segundos..."
 sync
 sleep 5
