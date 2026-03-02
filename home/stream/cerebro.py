@@ -6,6 +6,7 @@ import subprocess
 import requests
 import socket
 import hashlib
+import time
 from dotenv import load_dotenv
 
 # --- CARREGAR CONFIGS DO .ENV ---
@@ -118,7 +119,7 @@ def main():
     try:
         with open("/proc/uptime", "r") as f:
             uptime = float(f.readline().split()[0])
-            if uptime < 60: datetime.time.sleep(10) # Aguarda 10s se bootou há menos de 1 min
+            if uptime < 60: time.sleep(10) # Aguarda 10s se bootou há menos de 1 min
     except: pass
 
     update_schedule_from_web()

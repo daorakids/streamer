@@ -168,6 +168,8 @@ WantedBy=multi-user.target
     run_cmd("cp /tmp/daorakids-live.service /etc/systemd/system/daorakids-live.service", sudo=True)
 
     # 8. Logs & Monitor
+    with open("/tmp/daorakids-logs", "w") as f:
+        f.write("stream ALL=(ALL) NOPASSWD: /usr/bin/journalctl, /usr/bin/systemctl, /usr/bin/tail\n")
     run_cmd("cp /tmp/daorakids-logs /etc/sudoers.d/daorakids-logs", sudo=True)
     
     bashrc_path = "/home/stream/.bashrc"
