@@ -1,18 +1,18 @@
-# Projeto Daora Kids v2.8.33 📺🍿
+# Projeto Daora Kids v2.8.34 📺🍿
 
-**Status:** v2.8.33 - Libs Python Garantidas e Sincronismo Relâmpago (1min).
+**Status:** v2.8.34 - Sincronizador Robusto e Sincronismo Relâmpago.
 
 ## 🚀 Arquitetura Atual (Sincronização Remota)
 
-1.  **Auto-login & Sistema (Mega Bootstrap v2.8.33):**
-    - **Libs Garantidas:** Instalação automática de `python3-requests` e `python3-dotenv` para evitar falhas no sincronizador.
-    - **Sincronismo Relâmpago:** Timer de sincronização agora dispara apenas 1 min após o boot (antes 5 min).
-    - **Sincronizador Pro:** Script `sincronizador.py` com feedback "Arquivo X de Y" e mirroring real.
-    - **HDMI Dashboard:** Boot silencioso e monitoramento automático via `.bashrc`.
+1.  **Auto-login & Sistema (Mega Bootstrap v2.8.34):**
+    - **Sincronizador Robusto:** Script `sincronizador.py` com detecção automática de erros (401, bibliotecas faltantes) e feedback "X de Y".
+    - **Sincronismo Relâmpago:** Timer agora dispara 1 min após o boot para garantir preenchimento imediato do pendrive.
+    - **Faxina do MicroSD:** Remoção automática de vídeos antigos que entupiam o cartão SD.
+    - **Dominação HDMI:** Boot 100% limpo, silencioso e auto-login manual garantido.
 
 2.  **Monitor de Transmissão (`ver_live.sh`):**
-    - **Gestão de Serviços:** Comandos `daora-start` e `daora-stop` oficiais.
-    - **Manual Integrado:** Lembrete de comandos exibido no log a cada 5 minutos.
+    - **Comandos Globais:** `daora-start` e `daora-stop` para gestão ágil.
+    - **Logs Consolidados:** `log` unificado mostra o progresso do novo sincronizador.
 
 
 2.  **Monitor de Transmissão (`ver_live.sh`):**
