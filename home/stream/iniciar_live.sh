@@ -48,9 +48,10 @@ while true; do
     if [ -f "$CONFIG_FILE" ]; then
         source "$CONFIG_FILE"
     else
-        echo "⚠️ Aguardando Cerebro.py gerar configuracao..."
-        echo "   (Dica: Use 'log' para ver detalhes do Cerebro)"
-        sleep 30
+        HORA_AGORA=$(date +'%H:%M')
+        echo "💤 [$HORA_AGORA] Fora do horario de transmissao ou aguardando agenda..."
+        echo "   (Dica: Use 'log' para ver o relogio do Cerebro)"
+        sleep 60
         continue
     fi
 

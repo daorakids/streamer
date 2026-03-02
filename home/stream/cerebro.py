@@ -128,7 +128,19 @@ def get_current_slot():
                     break
 
     if not slot:
-        log_debug("💤 Nenhum slot programado para este horario.")
+        log_debug("💤 Nenhum slot programado para este horario na agenda.")
+        # Tenta encontrar o próximo slot do dia para informar no log
+        next_slot = None
+        day_slots = data.get("schedule", {}).get(hoje_dia, [])
+        for s in day_slots:
+            if s["start"] > hora_atual:
+                next_slot = s["start"]
+                break
+        if next_slot:
+            log_debug(f"⏰ Proxima transmissao programada para as {next_slot}")
+        else:
+            log_debug("⏰ Nao ha mais transmissoes programadas para hoje.")
+            
         return {"lang": "OFF"}
     
     lang_key = slot['lang'].lower()
