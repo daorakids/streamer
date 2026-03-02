@@ -76,7 +76,8 @@ echo -e "\n\033[1;32m🎨 CONFIGURAÇÃO DAORA KIDS v2.8.2\033[0m"
 ENV_FILE="$BASE_DIR/.env"
 
 if [ -f "$ENV_FILE" ]; then
-    read -p "⚠️  Instalação detectada! Deseja [U] Atualizar Scripts ou [R] Reinstalar tudo? (U/R): " choice < /dev/tty
+    echo -n "⚠️  Instalação detectada! Deseja [U] Atualizar Scripts ou [R] Reinstalar tudo? (U/R): "
+    read choice < /dev/tty
     if [[ "$choice" =~ ^[Uu]$ ]]; then
         echo "🚀 Modo Update: Preservando configurações..."
         MODE="update"
@@ -85,20 +86,20 @@ fi
 
 if [ "$MODE" != "update" ]; then
     echo -e "\n🔔 Digite as chaves do YouTube agora (obtidas no Painel de Transmissão):"
-    read -p "   Chave YT (PT): " yt_pt < /dev/tty
-    read -p "   Chave YT (EN): " yt_en < /dev/tty
-    read -p "   Chave YT (ES): " yt_es < /dev/tty
+    echo -n "   Chave YT (PT): "; read yt_pt < /dev/tty
+    echo -n "   Chave YT (EN): "; read yt_en < /dev/tty
+    echo -n "   Chave YT (ES): "; read yt_es < /dev/tty
     
     echo -e "\n🔔 Dados do Telegram (para avisos e monitoramento):"
-    read -p "   Token do Bot: " tg_token < /dev/tty
-    read -p "   Chat ID:      " tg_chat_id < /dev/tty
+    echo -n "   Token do Bot: "; read tg_token < /dev/tty
+    echo -n "   Chat ID:      "; read tg_chat_id < /dev/tty
     
     echo -e "\n📂 Servidor de Sincronização:"
-    read -p "   URL [https://daorakids.com.br/util/stream/]: " sync_url < /dev/tty
+    echo -n "   URL [https://daorakids.com.br/util/stream/]: "; read sync_url < /dev/tty
     sync_url=${sync_url:-"https://daorakids.com.br/util/stream/"}
-    read -p "   Usuário [stream]: " sync_user < /dev/tty
+    echo -n "   Usuário [stream]: "; read sync_user < /dev/tty
     sync_user=${sync_user:-"stream"}
-    read -p "   Senha [stream]:   " sync_pass < /dev/tty
+    echo -n "   Senha [stream]:   "; read sync_pass < /dev/tty
     sync_pass=${sync_pass:-"stream"}
 
     # Criar .env
