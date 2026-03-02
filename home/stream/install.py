@@ -100,23 +100,32 @@ SYNC_PASS="{sync_pass}"
     cut_dirs = len(path_parts)
 
     # 6. Pendrive (Otimizado: Busca UUID)
+    print("💾 Configurando montagem do Pendrive...")
     run_cmd("mkdir -p /mnt/videos", sudo=True)
+    
     with open("/etc/fstab", "r") as f:
         fstab_content = f.read()
 
+    # Busca UUID do sda1 (pendrive)
     uuid_raw = run_cmd("blkid -s UUID -o value /dev/sda1").stdout.strip()
-    if uuid_raw and uuid_raw not in fstab_content:
-        line = f"\nUUID={uuid_raw} /mnt/videos auto nosuid,nodev,nofail,x-gvfs-show,umask=000,flush,noatime 0 0\n"
-        with open("/tmp/fstab", "w") as tmp_f:
-            tmp_f.write(fstab_content + line)
-        run_cmd("cp /tmp/fstab /etc/fstab", sudo=True)
-        run_cmd("systemctl daemon-reload", sudo=True)
-    elif not uuid_raw and "/dev/sda1" not in fstab_content:
-        line = "\n/dev/sda1 /mnt/videos auto nosuid,nodev,nofail,x-gvfs-show,umask=000,flush,noatime 0 0\n"
-        with open("/tmp/fstab", "w") as tmp_f:
-            tmp_f.write(fstab_content + line)
-        run_cmd("cp /tmp/fstab /etc/fstab", sudo=True)
-        run_cmd("systemctl daemon-reload", sudo=True)
+    
+    # Se já existir alguma referência ao mountpoint, não adicionamos de novo
+    if "/mnt/videos" not in fstab_content:
+        line = ""
+        if uuid_raw:
+            print(f"   ✅ Pendrive encontrado (UUID: {uuid_raw})")
+            line = f"UUID={uuid_raw} /mnt/videos auto nosuid,nodev,nofail,x-gvfs-show,umask=000,flush,noatime 0 0\n"
+        else:
+            print("   ⚠️ Pendrive não detectado via UUID, usando /dev/sda1 genérico.")
+            line = "/dev/sda1 /mnt/videos auto nosuid,nodev,nofail,x-gvfs-show,umask=000,flush,noatime 0 0\n"
+        
+        if line:
+            with open("/tmp/fstab_append", "w") as tmp_f:
+                tmp_f.write(line)
+            run_cmd("cat /tmp/fstab_append | sudo tee -a /etc/fstab", sudo=False)
+            run_cmd("systemctl daemon-reload", sudo=True)
+    
+    print("   🚀 Montando unidades...")
     run_cmd("mount -a", sudo=True)
 
     # 6.1 Hardware Watchdog

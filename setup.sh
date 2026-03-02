@@ -56,9 +56,12 @@ fi
 # 6. Distribuição de arquivos
 echo "🚚 Movendo arquivos para os locais de destino..."
 cp -a $TEMP_DIR/home/stream/. $BASE_DIR/
-if [ -d "$TEMP_DIR/etc" ]; then
-    cp -r $TEMP_DIR/etc/* /etc/
-fi
+
+# Instalação de serviços systemd (Removendo o perigoso cp -r /etc)
+echo "⚙️ Instalando serviços do sistema..."
+cp $BASE_DIR/*.service /etc/systemd/system/
+cp $BASE_DIR/*.timer /etc/systemd/system/
+systemctl daemon-reload
 
 # 7. Ajuste de permissões
 chown -R stream:stream $BASE_DIR
