@@ -48,7 +48,8 @@ while true; do
     if [ -f "$CONFIG_FILE" ]; then
         source "$CONFIG_FILE"
     else
-        echo "⚠️ Aguardando configuração do Cérebro (Cerebro.py)..."
+        echo "⚠️ Aguardando Cerebro.py gerar configuracao..."
+        echo "   (Dica: Use 'log' para ver detalhes do Cerebro)"
         sleep 30
         continue
     fi

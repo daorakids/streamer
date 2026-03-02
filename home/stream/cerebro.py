@@ -7,7 +7,13 @@ import requests
 import socket
 import hashlib
 import time
+import sys
 from dotenv import load_dotenv
+
+# --- CONFIGURAÇÃO DE LOGS ---
+def log_debug(msg):
+    timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    print(f"🧠 [CEREBRO DEBUG] [{timestamp}] {msg}", flush=True)
 
 # --- CARREGAR CONFIGS DO .ENV ---
 BASE_DIR = "/home/stream"
@@ -23,7 +29,8 @@ VIDEO_ROOT = "/mnt/videos"
 # --- CONFIGS TELEGRAM ---
 TG_TOKEN = os.getenv("TELEGRAM_TOKEN")
 TG_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
-WEB_SCHEDULE_URL = os.getenv("SYNC_URL", "https://daorakids.com.br/util/stream/").rstrip('/') + "/schedule.json"
+SYNC_URL = os.getenv("SYNC_URL", "https://daorakids.com.br/util/stream/").rstrip('/')
+WEB_SCHEDULE_URL = f"{SYNC_URL}/schedule.json"
 
 def get_ips():
     try:
@@ -32,21 +39,15 @@ def get_ips():
         internal = s.getsockname()[0]
         s.close()
         external = requests.get('https://api.ipify.org', timeout=5).text
-    except:
+    except Exception as e:
+        log_debug(f"⚠️ Erro ao obter IPs: {e}")
         internal, external = "N/A", "N/A"
     return internal, external
 
-def send_telegram(message):
-    if not TG_TOKEN or not TG_CHAT_ID: return
-    try:
-        url = f"https://api.telegram.org/bot{TG_TOKEN}/sendMessage"
-        data = {"chat_id": TG_CHAT_ID, "text": message, "parse_mode": "HTML"}
-        requests.post(url, data=data, timeout=10)
-    except: pass
-
 def find_video_dir(lang):
-    """Encontra a pasta de vídeos de forma case-insensitive (ex: EN, en, En)."""
-    if not os.path.exists(VIDEO_ROOT): return None
+    if not os.path.exists(VIDEO_ROOT):
+        log_debug(f"🚨 PASTA RAIZ NAO EXISTE: {VIDEO_ROOT}")
+        return None
     lang_lower = lang.lower()
     for item in os.listdir(VIDEO_ROOT):
         if item.lower() == lang_lower and os.path.isdir(os.path.join(VIDEO_ROOT, item)):
@@ -54,86 +55,111 @@ def find_video_dir(lang):
     return None
 
 def update_schedule_from_web():
+    log_debug(f"🌐 Tentando baixar agenda de: {WEB_SCHEDULE_URL}")
     try:
         response = requests.get(WEB_SCHEDULE_URL, timeout=15)
+        log_debug(f"📡 Resposta do servidor: {response.status_code}")
         if response.status_code == 200:
             new_content = response.text
             try:
                 json.loads(new_content) # Valida se é JSON
-            except ValueError: return
+            except ValueError:
+                log_debug("❌ Erro: O conteudo baixado nao e um JSON valido!")
+                return
 
             if os.path.exists(SCHEDULE_PATH):
                 with open(SCHEDULE_PATH, 'r') as f:
                     old_content = f.read()
                 if hashlib.md5(new_content.encode()).hexdigest() == hashlib.md5(old_content.encode()).hexdigest():
+                    log_debug("✅ Agenda ja esta atualizada (MD5 bate).")
                     return 
             
             with open(SCHEDULE_PATH, 'w') as f:
                 f.write(new_content)
-            print(f"[{datetime.datetime.now()}] Agenda atualizada via Web.")
-    except: pass
+            log_debug("✨ Nova agenda salva com sucesso!")
+        else:
+            log_debug(f"⚠️ Servidor retornou erro {response.status_code}")
+    except Exception as e:
+        log_debug(f"❌ Falha de rede ao buscar agenda: {e}")
 
 def get_current_slot():
+    log_debug("📅 Analisando agenda local...")
     try:
-        if not os.path.exists(SCHEDULE_PATH): 
-            print("⚠️ Arquivo schedule.json nao encontrado!")
+        if not os.path.exists(SCHEDULE_PATH):
+            log_debug(f"⚠️ {SCHEDULE_PATH} nao existe!")
             return None
         with open(SCHEDULE_PATH, 'r') as f:
             data = json.load(f)
-    except Exception as e: 
-        print(f"❌ Erro ao ler schedule.json: {e}")
+    except Exception as e:
+        log_debug(f"❌ Erro ao ler JSON local: {e}")
         return None
 
-    if data.get("emergency_stop"): 
-        print("🛑 Parada de Emergencia ativada no JSON.")
+    if data.get("emergency_stop"):
+        log_debug("🛑 EMERGENCY STOP detectado no JSON!")
         return {"lang": "STOP"}
 
     agora = datetime.datetime.now()
     hoje_iso = agora.strftime("%Y-%m-%d")
-    # Force English weekday names to match schedule.json keys (mon, tue, wed...)
     days_map = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
     hoje_dia = days_map[agora.weekday()]
     hora_atual = agora.strftime("%H:%M")
 
-    print(f"🔍 Checando slot para {hoje_dia} as {hora_atual}...")
+    log_debug(f"⏰ Horario do Sistema: {hoje_dia} {hora_atual}")
+
     slot = None
+    # 1. Checa datas especiais
     special = data.get("special_dates", {}).get(hoje_iso)
     if special:
+        log_debug(f"📅 Data especial detectada: {hoje_iso}")
         for s in special:
-            if s["start"] <= hora_atual <= s["end"]: slot = s; break
+            if s["start"] <= hora_atual <= s["end"]:
+                slot = s
+                log_debug(f"🎯 Slot especial encontrado: {slot}")
+                break
 
+    # 2. Checa agenda semanal
     if not slot:
         day_slots = data.get("schedule", {}).get(hoje_dia)
         if day_slots:
             for s in day_slots:
-                if s["start"] <= hora_atual <= s["end"]: slot = s; break
+                if s["start"] <= hora_atual <= s["end"]:
+                    slot = s
+                    log_debug(f"🎯 Slot semanal encontrado: {slot}")
+                    break
 
-    if not slot: return {"lang": "OFF"}
+    if not slot:
+        log_debug("💤 Nenhum slot programado para este horario.")
+        return {"lang": "OFF"}
     
-    # Normaliza o idioma para busca de chave e pasta
     lang_key = slot['lang'].lower()
     web_keys = data.get("stream_keys", {})
     
-    # Busca a chave (prioridade para o que está no JSON)
     if lang_key in web_keys:
         slot["key"] = web_keys[lang_key]
     else:
-        # Tenta buscar as chaves do .env se não estiver no JSON
         slot["key"] = os.getenv(f"YT_KEY_{lang_key.upper()}")
+        log_debug(f"🔑 Chave obtida via .env para {lang_key}")
         
     return slot
 
 def main():
-    # Dá um respiro inicial se o sistema acabou de bootar (evita erros de rede)
+    log_debug("--- INICIANDO EXECUCAO DO CEREBRO ---")
+    
+    # Check Uptime
     try:
         with open("/proc/uptime", "r") as f:
             uptime = float(f.readline().split()[0])
-            if uptime < 60: time.sleep(10) # Aguarda 10s se bootou há menos de 1 min
+            if uptime < 60:
+                log_debug(f"⏳ Sistema ligou ha pouco ({uptime:.1f}s), aguardando rede...")
+                time.sleep(15)
     except: pass
 
     update_schedule_from_web()
     slot = get_current_slot()
-    if not slot: return
+    
+    if not slot:
+        log_debug("🚨 Falha critica: Nao foi possivel determinar o slot.")
+        return
 
     current_state = {}
     if os.path.exists(CURRENT_STATE_FILE):
@@ -142,8 +168,11 @@ def main():
                 current_state = json.load(f)
         except: pass
 
-    # Se mudar qualquer coisa no slot ou se o arquivo de config sumiu, regera tudo.
-    if slot != current_state or not os.path.exists(CONFIG_FILE):
+    # Forçar criação se o arquivo sumiu
+    config_missing = not os.path.exists(CONFIG_FILE)
+    
+    if slot != current_state or config_missing:
+        log_debug(f"🔄 Mudanca de estado detectada (ou config faltando={config_missing})")
         target_lang = slot.get("lang", "OFF").lower()
         target_mode = slot.get("mode", "sequential")
         target_key = slot.get("key", "")
@@ -153,30 +182,33 @@ def main():
 
         if target_lang in ["stop", "off"]:
             if os.path.exists(CONFIG_FILE): os.remove(CONFIG_FILE)
-            send_telegram(f"🛑 <b>Daora Kids</b>\nStatus: {target_lang.upper()}\nLive finalizada.")
+            log_debug("🛑 Modo OFF/STOP. Removendo arquivo de configuracao.")
         else:
-            # Sincronização de vídeos on-demand se o idioma mudou
-            if target_lang != current_state.get("lang", "").lower():
-                subprocess.Popen(["sudo", "systemctl", "start", "daorakids-sync.service"])
-
-            # Busca a pasta de vídeos (Independente de ser EN, en ou En)
             video_dir = find_video_dir(target_lang)
-            
-            if not video_dir or not os.listdir(video_dir):
-                ip_int, _ = get_ips()
-                send_telegram(f"🚨 <b>ERRO: Pasta '{target_lang.upper()}' não encontrada.</b>\nIP: {ip_int}\nAguardando sincronização...")
-                # O loop do iniciar_live.sh cuidará de tentar novamente.
-                if not video_dir: video_dir = os.path.join(VIDEO_ROOT, target_lang)
+            if not video_dir:
+                video_dir = os.path.join(VIDEO_ROOT, target_lang)
+                log_debug(f"⚠️ Pasta {video_dir} nao existe fisicamente!")
 
-            with open(CONFIG_FILE, 'w') as f:
-                f.write(f'CHAVE="{target_key}"\n')
-                f.write(f'PASTA_VIDEOS="{video_dir}"\n')
-                f.write(f'MODO="{target_mode}"\n')
-            
-            ip_int, _ = get_ips()
-            send_telegram(f"🚀 <b>Daora Kids AO VIVO!</b>\nIdioma: {target_lang.upper()}\nModo: {target_mode}\nIP: {ip_int}")
+            try:
+                with open(CONFIG_FILE, 'w') as f:
+                    f.write(f'CHAVE="{target_key}"\n')
+                    f.write(f'PASTA_VIDEOS="{video_dir}"\n')
+                    f.write(f'MODO="{target_mode}"\n')
+                log_debug(f"✅ Arquivo {CONFIG_FILE} gravado com sucesso!")
+                os.chmod(CONFIG_FILE, 0o777)
+            except Exception as e:
+                log_debug(f"❌ ERRO AO GRAVAR {CONFIG_FILE}: {e}")
 
+        # Reinicia o FFmpeg se a live estiver ativa
+        log_debug("♻️ Reiniciando processos de transmissao...")
         subprocess.run(["pkill", "-f", "ffmpeg"], stderr=subprocess.DEVNULL)
+    else:
+        log_debug("😴 Estado inalterado. Nada a fazer.")
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as e:
+        log_debug(f"💥 ERRO FATAL NO PYTHON: {e}")
+        import traceback
+        log_debug(traceback.format_exc())
