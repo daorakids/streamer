@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # ===============================================
-#  🚀 BOOTSTRAP DAORA KIDS LIVE 24H (v2.7)
+#  🚀 BOOTSTRAP DAORA KIDS LIVE 24H (v2.8.5)
 # ===============================================
 
 # 1. Verificar Privilégios e Estado do Disco
