@@ -28,7 +28,7 @@ def get_input(prompt, required=True):
 
 def setup_wizard():
     print("\n" + "="*40)
-    print(" 🎨 INSTALADOR/UPDATER DAORA KIDS v2.8.10 ")
+    print(" 🎨 INSTALADOR/UPDATER DAORA KIDS v2.8.11 ")
     print("="*40 + "\n")
 
     # Detecta se é Update ou Nova Instalação
