@@ -28,7 +28,7 @@ def get_input(prompt, required=True):
 
 def setup_wizard():
     print("\n" + "="*40)
-    print(" 🎨 INSTALADOR/UPDATER DAORA KIDS v2.8.11 ")
+    print(" 🎨 INSTALADOR/UPDATER DAORA KIDS v2.8.14 ")
     print("="*40 + "\n")
 
     # Detecta se é Update ou Nova Instalação
@@ -217,12 +217,37 @@ fi
             with open(bashrc_path, "a") as f_a:
                 f_a.write(bashrc_addon)
 
-    # 10. Auto-login & Log2Ram
-    autologin_dir = "/etc/systemd/system/getty@tty1.service.d"
-    run_cmd(f"mkdir -p {autologin_dir}", sudo=True)
-    with open("/tmp/autologin.conf", "w") as f:
-        f.write("[Service]\nExecStart=\nExecStart=-/sbin/agetty --autologin stream --noclear %I $TERM\n")
-    run_cmd(f"cp /tmp/autologin.conf {autologin_dir}/autologin.conf", sudo=True)
+    # 10. Auto-login (Blindado) & Log2Ram
+    print("🖥️  Configurando Auto-login no console (HDMI)...")
+    # Usa o método oficial do Raspberry para garantir o comportamento correto
+    run_cmd("raspi-config nonint do_boot_behaviour B2", sudo=True)
+    # Cirurgia: Troca o usuário 'pi' (padrão) pelo 'stream' no arquivo gerado pelo raspi-config
+    autologin_conf = "/etc/systemd/system/getty@tty1.service.d/autologin.conf"
+    if os.path.exists(autologin_conf):
+        run_cmd(f"sed -i 's/pi/stream/g' {autologin_conf}", sudo=True)
+    else:
+        # Fallback caso o raspi-config mude o local
+        run_cmd(f"mkdir -p /etc/systemd/system/getty@tty1.service.d", sudo=True)
+        with open("/tmp/autologin.conf", "w") as f:
+            f.write("[Service]\nExecStart=\nExecStart=-/sbin/agetty --autologin stream --noclear %I $TERM\n")
+        run_cmd(f"cp /tmp/autologin.conf {autologin_conf}", sudo=True)
+
+    # 11. Silenciador de Boot (Limpeza do HDMI)
+    print("🔇 Silenciando mensagens de boot no HDMI...")
+    # Desativa cloud-init output se existir
+    run_cmd("mkdir -p /etc/cloud/cloud.cfg.d", sudo=True)
+    run_cmd('echo "reporting: {logging: {type: log}}" | sudo tee /etc/cloud/cloud.cfg.d/05_logging.cfg', sudo=False)
+    # Tenta remover mensagens do kernel do console
+    cmdline = "/boot/firmware/cmdline.txt"
+    if not os.path.exists(cmdline): cmdline = "/boot/cmdline.txt"
+    if os.path.exists(cmdline):
+        with open(cmdline, "r") as f:
+            content = f.read()
+        if "quiet loglevel=3" not in content:
+            # Adiciona quiet e loglevel=3 para um boot limpo
+            new_content = content.replace("console=tty1", "console=tty3").strip() + " quiet loglevel=3 logo.nologo\n"
+            with open("/tmp/cmdline.txt", "w") as f: f.write(new_content)
+            run_cmd(f"cp /tmp/cmdline.txt {cmdline}", sudo=True)
 
     if not is_update:
         choice = input("\n🛡️ Deseja instalar Log2Ram para proteger seu Cartão SD? (S/N): ").strip().lower()
