@@ -1,14 +1,15 @@
-# Projeto Daora Kids v2.8.16 📺🍿
+# Projeto Daora Kids v2.8.17 📺🍿
 
-**Status:** v2.8.16 - Opção Nuclear HDMI: Purge cloud-init e reconstrução de cmdline.
+**Status:** v2.8.17 - Opção Nuclear HDMI v2: Purge total e reconstrução de boot.
 
 ## 🚀 Arquitetura Atual (Sincronização Remota)
 
-1.  **Auto-login & Sistema (Wizard v2.8.16):**
-    - **Opção Nuclear HDMI:** Purgagem completa do pacote `cloud-init` para limpar o console.
-    - **Rebuild cmdline.txt:** Reconstrução cirúrgica do arquivo de boot para remover o bug `enable_hdmi=0` e forçar `quiet`.
-    - **Auto-login Manual:** Override do Getty (TTY1) criado com comando único para evitar falhas de diretório.
-    - **Cérebro v2.8.16:** Diagnóstico avançado e detecção de slot inteligente.
+1.  **Auto-login & Sistema (Wizard v2.8.17):**
+    - **Opção Nuclear HDMI:** Purge completo dos pacotes `cloud-init` e `rpi-cloud-init-mods` para limpar o console.
+    - **Rebuild Cirúrgico do Boot:** Reconstrução dinâmica do `cmdline.txt` para remover o bug `enable_hdmi=0` e forçar `quiet`.
+    - **Auto-login Inabalável:** Implementado via `raspi-config` oficial com troca cirúrgica de usuário para `stream`.
+    - **Cérebro v2.8.17:** Diagnóstico total e persistência de configuração.
+
 
 2.  **Monitor de Transmissão (`ver_live.sh`):**
     - **Logs Unificados:** Agora mostra Live, Cérebro e Sincronizador em uma única tela.
