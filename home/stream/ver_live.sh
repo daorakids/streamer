@@ -26,5 +26,5 @@ echo "-------------------------------------------------"
 
 # Monitora Live, Cérebro e Sincronizador juntos
 # Filtramos o FFmpeg 'frame=' para não poluir a tela, mas mantemos o resto
-sudo journalctl -u daorakids-live.service -u daorakids-sync.service -f -n 20 | grep --line-buffered -v "frame="
+sudo journalctl -u daorakids-live.service -u daorakids-sync.service -u daorakids-cerebro.service -f -n 20 | grep --line-buffered -v "frame="
 

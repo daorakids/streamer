@@ -204,7 +204,7 @@ WantedBy=multi-user.target
     bashrc_addon = """
 # --- DAORA KIDS AUTO-MONITOR ---
 alias ver='/home/stream/ver_live.sh'
-alias log='sudo journalctl -u daorakids-live.service -f'
+alias log='sudo journalctl -u daorakids-live.service -u daorakids-cerebro.service -u daorakids-sync.service -f'
 alias monitor='/home/stream/ver_live.sh'
 
 # Inicia o monitor automaticamente apenas no terminal físico (HDMI)
