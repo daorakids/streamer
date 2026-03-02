@@ -1,10 +1,10 @@
-# Daora Kids v2.8.10 📺🍿
+# Daora Kids v2.8.14 📺🍿
 
 Sistema de Streaming Kids 24/7 (Raspberry Pi 3) - Blindado e Totalmente Remoto.
 
 ## 🚀 Como Instalar ou Atualizar (Zero-Touch Setup)
 
-Para instalar ou atualizar para a versão mais recente (**v2.8.10**), rode o comando abaixo no terminal do Raspberry:
+Para instalar ou atualizar para a versão mais recente (**v2.8.14**), rode o comando abaixo no terminal do Raspberry:
 
 ```bash
 sudo bash -c "$(curl -sSL https://raw.githubusercontent.com/daorakids/streamer/main/setup.sh?v=$RANDOM)"

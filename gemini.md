@@ -1,18 +1,18 @@
-# Projeto Daora Kids v2.8.10 📺🍿
+# Projeto Daora Kids v2.8.14 📺🍿
 
-**Status:** v2.8.10 - Independência de Locale, Systemd Timers e HDMI Dashboard.
+**Status:** v2.8.14 - HDMI Dominado, Boot Silencioso e Auto-login Oficial.
 
 ## 🚀 Arquitetura Atual (Sincronização Remota)
 
-1.  **Auto-login & Sistema (Wizard v2.8.10):**
-    - **Wizard em Bash:** Estabilidade total no terminal.
-    - **Blindagem do fstab:** Registro via UUID com detecção dinâmica.
-    - **Systemd Timers:** Cérebro e Sincronizador agendados via timers do sistema (substituindo o Cron).
-    - **Locale-Independent:** Cérebro usa datas em Inglês para casar com o servidor, ignorando o idioma do Raspberry.
+1.  **Auto-login & Sistema (Wizard v2.8.14):**
+    - **Auto-login Oficial:** Implementado via `raspi-config` para máxima compatibilidade com Debian 13.
+    - **HDMI Dashboard:** Monitoramento automático no terminal físico (HDMI) com tela limpa.
+    - **Boot Silencioso:** Kernel e mensagens de sistema ocultadas para uma experiência de "Kiosk".
+    - **Cérebro v2.8.14:** Independente de locale e com logs de diagnóstico unificados.
 
 2.  **Monitor de Transmissão (`ver_live.sh`):**
-    - **HDMI Dashboard:** Auto-monitor no TTY1 (HDMI) via `.bashrc`.
-    - **Atalhos:** Aliases `ver`, `monitor` e `log`.
+    - **Logs Unificados:** Agora mostra Live, Cérebro e Sincronizador em uma única tela.
+    - **Limpeza de Tela:** Comando `ver` limpa o terminal de forma absoluta antes de exibir o status.
 
 3.  **Instalação Bootstrap (`setup.sh`):**
     - Criacao robusta de `/mnt/videos` e isolamento de erros de hardware.
