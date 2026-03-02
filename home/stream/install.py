@@ -71,22 +71,28 @@ SYNC_PASS="{sync_pass}"
 
     # 6. Pendrive (Otimizado: Busca UUID para evitar erro de montagem)
     run_cmd("mkdir -p /mnt/videos", sudo=True)
+    
+    # Lemos o fstab uma única vez para evitar o bug do cursor no fim do arquivo
+    with open("/etc/fstab", "r") as f:
+        fstab_content = f.read()
+
+    # Tenta descobrir o UUID do pendrive sda1
     uuid_raw = run_cmd("blkid -s UUID -o value /dev/sda1").stdout.strip()
-    if uuid_raw:
-        with open("/etc/fstab", "r") as f:
-            if uuid_raw not in f.read():
-                line = f"\nUUID={uuid_raw} /mnt/videos auto nosuid,nodev,nofail,x-gvfs-show,umask=000,flush,noatime 0 0\n"
-                with open("/tmp/fstab", "w") as tmp_f:
-                    tmp_f.write(f.read() + line)
-                run_cmd("cp /tmp/fstab /etc/fstab", sudo=True)
-    else:
-        usb_dev = "/dev/sda1"
-        with open("/etc/fstab", "r") as f:
-            if usb_dev not in f.read():
-                line = f"\n{usb_dev} /mnt/videos auto nosuid,nodev,nofail,x-gvfs-show,umask=000,flush,noatime 0 0\n"
-                with open("/tmp/fstab", "w") as tmp_f:
-                    tmp_f.write(f.read() + line)
-                run_cmd("cp /tmp/fstab /etc/fstab", sudo=True)
+    
+    if uuid_raw and uuid_raw not in fstab_content:
+        line = f"\nUUID={uuid_raw} /mnt/videos auto nosuid,nodev,nofail,x-gvfs-show,umask=000,flush,noatime 0 0\n"
+        with open("/tmp/fstab", "w") as tmp_f:
+            tmp_f.write(fstab_content + line)
+        run_cmd("cp /tmp/fstab /etc/fstab", sudo=True)
+        run_cmd("systemctl daemon-reload", sudo=True)
+    elif not uuid_raw and "/dev/sda1" not in fstab_content:
+        # Fallback para /dev/sda1
+        line = "\n/dev/sda1 /mnt/videos auto nosuid,nodev,nofail,x-gvfs-show,umask=000,flush,noatime 0 0\n"
+        with open("/tmp/fstab", "w") as tmp_f:
+            tmp_f.write(fstab_content + line)
+        run_cmd("cp /tmp/fstab /etc/fstab", sudo=True)
+        run_cmd("systemctl daemon-reload", sudo=True)
+    
     run_cmd("mount -a", sudo=True)
 
     # 6.1 Ativar Hardware Watchdog
