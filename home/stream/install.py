@@ -82,12 +82,13 @@ SYNC_PASS="{sync_pass}"
     path_parts = [p for p in parsed_url.path.split('/') if p]
     cut_dirs = len(path_parts)
 
-    # 6. Pendrive
+    # 6. Pendrive (Otimizado para evitar corrupção)
     usb_dev = "/dev/sda1" 
     run_cmd("mkdir -p /mnt/videos", sudo=True)
     with open("/etc/fstab", "r") as f:
         if usb_dev not in f.read():
-            line = f"\n{usb_dev} /mnt/videos auto nosuid,nodev,nofail,x-gvfs-show,umask=000 0 0\n"
+            # flush: grava dados imediatamente / noatime: reduz escritas no disco
+            line = f"\n{usb_dev} /mnt/videos auto nosuid,nodev,nofail,x-gvfs-show,umask=000,flush,noatime 0 0\n"
             with open("/tmp/fstab", "w") as tmp_f:
                 tmp_f.write(f.read() + line)
             run_cmd("cp /tmp/fstab /etc/fstab", sudo=True)
@@ -135,8 +136,8 @@ ExecStart=-/sbin/agetty --autologin stream --noclear %I $TERM
     run_cmd(f"cp /tmp/autologin.conf {autologin_dir}/autologin.conf", sudo=True)
 
     run_cmd("systemctl daemon-reload", sudo=True)
-    run_cmd("systemctl enable --now daorakids-sync.timer", sudo=True)
-    run_cmd("systemctl enable --now daorakids-live.service", sudo=True)
+    run_cmd("systemctl enable daorakids-sync.timer", sudo=True)
+    run_cmd("systemctl enable daorakids-live.service", sudo=True)
     
     # Cron
     cron_jobs = f"""*/5 * * * * /usr/bin/python3 /home/stream/cerebro.py >> /home/stream/cerebro.log 2>&1
@@ -147,8 +148,10 @@ ExecStart=-/sbin/agetty --autologin stream --noclear %I $TERM
     run_cmd("crontab -u stream /tmp/mycron", sudo=True)
 
     print("\n✅ Operação concluída com sucesso!")
-    print("🔄 O sistema irá reiniciar em 10 segundos...")
-    run_cmd("sleep 10 && sudo reboot", sudo=False) # reboot já é chamado via sudo se necessário na func
+    print("💾 Gravando dados no disco (sync)...")
+    run_cmd("sync", sudo=True)
+    print("🔄 O sistema irá reiniciar em 5 segundos...")
+    run_cmd("sleep 5 && sudo reboot", sudo=False) # reboot já é chamado via sudo se necessário na func
 
 if __name__ == "__main__":
     setup_wizard()
