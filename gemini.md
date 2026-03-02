@@ -22,5 +22,21 @@
 3.  **Instalação Bootstrap (`setup.sh`):**
     - Criacao robusta de `/mnt/videos` e isolamento de erros de hardware.
 
+## 📋 Protocolo de Versão (Obrigatório em todo Commit)
+
+Para cada nova versão, os seguintes locais **DEVEM** ser atualizados simultaneamente:
+
+1.  **Manifestos:**
+    - `README.md`: Título e comando de instalação.
+    - `gemini.md`: Título e linha de status.
+2.  **Scripts de Instalação:**
+    - `setup.sh`: Cabeçalho, print de início, versão do Dashboard e print de sucesso.
+    - `home/stream/install.py`: Print do Wizard, versão do Dashboard e print de sucesso.
+3.  **Scripts de Execução:**
+    - `home/stream/cerebro.py`: Log de início (main).
+    - `home/stream/sincronizador.py`: Log de início (main).
+4.  **Serviços:**
+    - `home/stream/daorakids-sync.service`: Descrição (Unit).
+
 ---
 **Atualizado em:** 02 de Março de 2026 por Gemini CLI.
