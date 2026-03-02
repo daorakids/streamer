@@ -67,50 +67,51 @@ def setup_wizard():
     path_parts = [p for p in parsed_url.path.split('/') if p]
     cut_dirs = len(path_parts)
 
-    # 6. Pendrive (Super Detecção v2.8.4)
+    # 6. Pendrive (Super Detecção v2.8.5)
     print("💾 Configurando montagem do Pendrive...")
     run_cmd("mkdir -p /mnt/videos", sudo=True)
     
-    # 1. Limpeza: Remove qualquer linha antiga do /mnt/videos para evitar conflitos
-    run_cmd("grep -v '/mnt/videos' /etc/fstab > /tmp/fstab.clean", sudo=True)
-    run_cmd("cp /tmp/fstab.clean /etc/fstab", sudo=True)
+    try:
+        # 1. Limpeza: Remove qualquer linha antiga do /mnt/videos para evitar conflitos
+        run_cmd("grep -v '/mnt/videos' /etc/fstab > /tmp/fstab.clean", sudo=True)
+        run_cmd("cp /tmp/fstab.clean /etc/fstab", sudo=True)
 
-    # 2. Busca Automática do Dispositivo
-    device = ""
-    for dev in ['sda1', 'sdb1', 'sdc1']:
-        if os.path.exists(f"/dev/{dev}"):
-            device = f"/dev/{dev}"
-            break
-    
-    if device:
-        print(f"   🔍 Dispositivo detectado: {device}")
-        res = run_cmd(f"blkid -s UUID -o value {device}", sudo=True, capture=True)
-        uuid = res.stdout.strip() if res.stdout else ""
+        # 2. Busca Automática do Dispositivo
+        device = ""
+        for dev in ['sda1', 'sdb1', 'sdc1']:
+            if os.path.exists(f"/dev/{dev}"):
+                device = f"/dev/{dev}"
+                break
         
-        if uuid:
-            print(f"   ✅ UUID encontrado: {uuid}")
-            line = f"UUID={uuid} /mnt/videos auto nosuid,nodev,nofail,x-gvfs-show,umask=000,flush,noatime 0 0"
+        if device:
+            print(f"   🔍 Dispositivo detectado: {device}")
+            res = run_cmd(f"blkid -s UUID -o value {device}", sudo=True, capture=True)
+            uuid = res.stdout.strip() if res.stdout else ""
+            
+            if uuid:
+                print(f"   ✅ UUID encontrado: {uuid}")
+                line = f"UUID={uuid} /mnt/videos auto nosuid,nodev,nofail,x-gvfs-show,umask=000,flush,noatime 0 0"
+            else:
+                print(f"   ⚠️ UUID nao encontrado para {device}, usando caminho direto.")
+                line = f"{device} /mnt/videos auto nosuid,nodev,nofail,x-gvfs-show,umask=000,flush,noatime 0 0"
+            
+            # Adiciona ao fstab
+            run_cmd(f'echo "{line}" | sudo tee -a /etc/fstab', sudo=False)
+            print("   📝 Configuraçao adicionada ao /etc/fstab")
+
+            # 3. Forçar Montagem
+            run_cmd("systemctl daemon-reload", sudo=True)
+            print("   🚀 Tentando montar...")
+            run_cmd("mount /mnt/videos", sudo=True)
         else:
-            print(f"   ⚠️ UUID nao encontrado para {device}, usando caminho direto.")
-            line = f"{device} /mnt/videos auto nosuid,nodev,nofail,x-gvfs-show,umask=000,flush,noatime 0 0"
-        
-        # Adiciona ao fstab
-        run_cmd(f'echo "{line}" | sudo tee -a /etc/fstab', sudo=False)
-        print("   📝 Configuraçao adicionada ao /etc/fstab")
-    else:
-        print("   ❌ ERRO: Nenhum pendrive detectado em /dev/sda1 ou /dev/sdb1!")
-        print("      Certifique-se de que o pendrive esta conectado.")
+            print("   ❌ AVISO: Nenhum pendrive detectado! A live podera falhar.")
+    except Exception as e:
+        print(f"   ⚠️ Erro durante configuracao do pendrive: {e}")
 
-    # 3. Forçar Montagem
-    run_cmd("systemctl daemon-reload", sudo=True)
-    print("   🚀 Tentando montar...")
-    mount_res = run_cmd("mount /mnt/videos", sudo=True)
-    
     if os.path.ismount("/mnt/videos"):
         print("   ✨ SUCESSO! Pendrive montado em /mnt/videos")
     else:
-        print("   ⚠️ FALHA na montagem. Tentando montagem generica...")
-        run_cmd("mount -a", sudo=True)
+        print("   ⚠️ Pendrive nao montado.")
 
     # 6.1 Hardware Watchdog
     print("🐕 Ativando Hardware Watchdog...")
@@ -195,7 +196,8 @@ WantedBy=multi-user.target
     
     print("\n✅ Operação concluída!")
     run_cmd("sync", sudo=True)
-    run_cmd("umount /mnt/videos", sudo=True)
+    if os.path.ismount("/mnt/videos"):
+        run_cmd("umount /mnt/videos", sudo=True)
     print("🔄 Reiniciando em 5s...")
     time.sleep(5)
     run_cmd("reboot", sudo=True)
