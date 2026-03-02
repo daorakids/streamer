@@ -1,18 +1,17 @@
 #!/bin/bash
 
 # ===============================================
-#  🚀 SUPER-BOOTSTRAP DAORA KIDS LIVE (v2.8.36)
-#  (Deps & Boot Sync Fix)
+#  🚀 SUPER-BOOTSTRAP DAORA KIDS LIVE (v2.8.38)
 # ===============================================
 
-# 1. Privilégios e Remontagem
+# 1. Privilégios
 if [ "$(id -u)" -ne 0 ]; then
     echo "🚨 Rode com sudo!"
     exit 1
 fi
 
 clear
-echo -e "\033[1;32m🎨 INICIANDO DOMINAÇÃO HDMI v2.8.36\033[0m"
+echo -e "\033[1;32m🎨 INICIANDO DOMINAÇÃO v2.8.38\033[0m"
 
 # 2. Garantir Sudoers para o usuário stream
 echo "👤 Configurando privilegios do usuario stream..."
@@ -24,21 +23,16 @@ fi
 echo "stream ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/stream
 chmod 0440 /etc/sudoers.d/stream
 
-echo "🔄 Iniciando Setup do Sistema..."
-
-# 3. Instalar dependências essenciais (INCLUINDO LIBS PYTHON)
-echo "📦 Verificando dependências (ffmpeg, python3, libs)..."
-apt-get update -qq
-apt-get install -y -qq git python3-pip curl python3-dotenv python3-requests ffmpeg
-
-# 4. OPÇÃO NUCLEAR: Expurgo total
+# 3. EXPURGO HDMI (Força Bruta)
 echo "🧹 Expurgando cloud-init..."
-killall apt apt-get dpkg 2>/dev/null
-rm -f /var/lib/dpkg/lock* 2>/dev/null
+# Desativa os serviços antes de remover
+systemctl stop cloud-init cloud-config cloud-final cloud-init-local 2>/dev/null
+systemctl disable cloud-init cloud-config cloud-final cloud-init-local 2>/dev/null
+# Remove os pacotes e configurações
 DEBIAN_FRONTEND=noninteractive apt-get purge -y --allow-remove-essential cloud-init rpi-cloud-init-mods
 rm -rf /etc/cloud /var/lib/cloud
 
-# 5. AUTO-LOGIN FORÇADO
+# 4. AUTO-LOGIN FORÇADO (Direct systemd override)
 echo "🖥️  Forcando Auto-login no tty1..."
 mkdir -p /etc/systemd/system/getty@tty1.service.d
 cat <<EOF > /etc/systemd/system/getty@tty1.service.d/autologin.conf
@@ -48,7 +42,7 @@ ExecStart=-/sbin/agetty --autologin stream --noclear %I \$TERM
 EOF
 systemctl daemon-reload
 
-# 6. RECONSTRUÇÃO DO CMDLINE
+# 5. RECONSTRUÇÃO DO CMDLINE
 echo "🔇 Reconstruindo cmdline.txt..."
 CMDLINE="/boot/firmware/cmdline.txt"
 [ ! -f "$CMDLINE" ] && CMDLINE="/boot/cmdline.txt"
@@ -58,12 +52,12 @@ if [ -f "$CMDLINE" ]; then
     echo "console=tty3 quiet loglevel=3 logo.nologo vt.global_cursor_default=0 snd_bcm2835.enable_hdmi=1 $ROOT_PART rootfstype=ext4 fsck.repair=yes rootwait" > $CMDLINE
 fi
 
-# 7. Preparação de Pastas
+# 6. Preparação de Pastas
 mkdir -p /mnt/videos
 chmod 777 /mnt/videos
 mkdir -p /home/stream
 
-# 8. Wizard de Configuração
+# 7. Wizard de Configuração
 echo -e "\n\033[1;33m📝 CONFIGURAÇÃO DE CREDENCIAIS\033[0m"
 ENV_FILE="/home/stream/.env"
 
@@ -76,7 +70,6 @@ else
 fi
 
 if [ "$MODE" == "reconfig" ]; then
-    # Tenta ler URL atual se existir
     OLD_SYNC_URL=$(grep "SYNC_URL=" $ENV_FILE 2>/dev/null | cut -d'"' -f2)
     DEFAULT_URL=${OLD_SYNC_URL:-"https://daorakids.com.br/util/stream/"}
 
@@ -105,7 +98,7 @@ EOF
     chown stream:stream $ENV_FILE
 fi
 
-# 9. Download Final dos Scripts
+# 8. Download Final dos Scripts
 echo "📦 Baixando scripts atualizados..."
 TEMP_GIT="/tmp/daorakids_git"
 rm -rf $TEMP_GIT
@@ -115,20 +108,21 @@ rm -rf /home/stream/videos
 chown -R stream:stream /home/stream
 chmod +x /home/stream/*.sh /home/stream/*.py
 
-# 10. Ativando Serviços
+# 9. Ativando Serviços
 echo "⚙️  Ativando servicos..."
 cp /home/stream/*.service /etc/systemd/system/
 cp /home/stream/*.timer /etc/systemd/system/
 systemctl daemon-reload
 systemctl enable daorakids-cerebro.timer daorakids-sync.timer daorakids-live.service
-systemctl start daorakids-cerebro.timer
+# Inicia imediatamente
+systemctl start daorakids-cerebro.timer daorakids-sync.timer
 
-# 11. Dashboard HDMI e Comandos Globais
-echo "📊 Configurando Dashboard e Atalhos..."
+# 10. Dashboard HDMI e Atalhos
+echo "📊 Configurando Dashboard..."
 BASHRC="/home/stream/.bashrc"
 sed -i '/DAORA KIDS/,/fi/d' $BASHRC
 cat <<EOF >> $BASHRC
-# --- DAORA KIDS DASHBOARD v2.8.36 ---
+# --- DAORA KIDS DASHBOARD v2.8.38 ---
 alias ver='/home/stream/ver_live.sh'
 alias log='sudo journalctl -u daorakids-live.service -u daorakids-cerebro.service -u daorakids-sync.service -f'
 alias monitor='/home/stream/ver_live.sh'
@@ -142,8 +136,8 @@ if [ "\$(tty)" = "/dev/tty1" ]; then
 fi
 EOF
 
-echo -e "\n\033[1;32m✅ SUCESSO v2.8.36!\033[0m"
-echo "🔄 Reiniciando em 5 segundos..."
+echo -e "\n\033[1;32m✅ SUCESSO v2.8.38!\033[0m"
+echo "🔄 Reiniciando para dominar o HDMI e o Sync..."
 sync
 sleep 5
 reboot
