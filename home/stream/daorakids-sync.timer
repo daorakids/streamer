@@ -1,10 +1,10 @@
 [Unit]
-Description=Timer para Sincronizacao de Videos Daora Kids (Boot + Hora em Hora)
+Description=Timer para Sincronizacao de Videos Daora Kids
 
 [Timer]
-# Roda 2 minutos apos o boot (para dar tempo da internet subir)
-OnBootSec=2min
-# Roda exatamente no inicio de cada hora (Ex: 14:00, 15:00...)
+# Roda 1 minuto apos o boot para garantir rede e libs
+OnBootSec=1min
+# Roda no minuto zero de cada hora
 OnCalendar=hourly
 # Garante que rode mesmo se o Pi ligar depois da hora marcada
 Persistent=true
