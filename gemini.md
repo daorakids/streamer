@@ -1,18 +1,18 @@
-# Projeto Daora Kids v2.8.36 📺🍿
+# Projeto Daora Kids v2.8.38 📺🍿
 
-**Status:** v2.8.36 - Sincronização Flexível e Alinhamento de Versões.
+**Status:** v2.8.38 - Sincronizador Ultra-Sensível e Início Forçado.
 
 ## 🚀 Arquitetura Atual (Sincronização Remota)
 
-1.  **Auto-login & Sistema (Mega Bootstrap v2.8.36):**
-    - **Wizard Flexível:** Pergunta da `SYNC_URL` restaurada para permitir mudança de servidores.
-    - **Sincronizador Robusto:** Script `sincronizador.py` agora inclui diagnósticos detalhados e autenticação.
-    - **Dominação HDMI:** Boot 100% silencioso e auto-login manual no usuário `stream`.
-    - **Cérebro v2.8.36:** Alinhado com a agenda e independente de locale.
+1.  **Auto-login & Sistema (Mega Bootstrap v2.8.38):**
+    - **Sincronizador Ultra-Sensível:** Regex aprimorado para capturar links em qualquer formato de servidor.
+    - **Início Imediato:** Setup agora força o start dos serviços e timers antes do reboot para diagnósticos rápidos.
+    - **Dominação HDMI Final:** Expurgo total de cloud-init e reconstrução de boot garantidos.
+    - **Auto-login Manual:** Implementado via override direto para evitar falhas de utilitários externos.
 
 2.  **Monitor de Transmissão (`ver_live.sh`):**
-    - **Comandos Globais:** `daora-start` e `daora-stop` para gestão ágil.
-    - **Feedback Visual:** Log unificado mostra o progresso do sincronizador e lembretes de comandos.
+    - **Comandos de Controle:** `daora-start` e `daora-stop` integrados ao dashboard.
+    - **Logs Consolidados:** Exibe progresso do novo sincronizador e relógio do Cérebro.
 
 
 2.  **Monitor de Transmissão (`ver_live.sh`):**
