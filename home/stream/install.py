@@ -67,42 +67,50 @@ def setup_wizard():
     path_parts = [p for p in parsed_url.path.split('/') if p]
     cut_dirs = len(path_parts)
 
-    # 6. Pendrive (Otimizado e Seguro)
+    # 6. Pendrive (Super Detecção v2.8.4)
     print("💾 Configurando montagem do Pendrive...")
     run_cmd("mkdir -p /mnt/videos", sudo=True)
     
-    # Lê o fstab atual do sistema
-    try:
-        with open("/etc/fstab", "r") as f:
-            fstab_content = f.read()
-    except:
-        fstab_content = ""
+    # 1. Limpeza: Remove qualquer linha antiga do /mnt/videos para evitar conflitos
+    run_cmd("grep -v '/mnt/videos' /etc/fstab > /tmp/fstab.clean", sudo=True)
+    run_cmd("cp /tmp/fstab.clean /etc/fstab", sudo=True)
 
-    # SEGURO: Só mexemos no fstab se o ponto de montagem /mnt/videos NÃO existir
-    if "/mnt/videos" not in fstab_content:
-        # Busca UUID do sda1 (pendrive) com sudo e captura de texto
-        res = run_cmd("blkid -s UUID -o value /dev/sda1", sudo=True, capture=True)
-        uuid_raw = res.stdout.strip() if res.stdout else ""
-        
-        line = ""
-        if uuid_raw:
-            print(f"   ✅ Pendrive encontrado (UUID: {uuid_raw})")
-            line = f"\n# Montagem automatica do Pendrive Daora Kids\nUUID={uuid_raw} /mnt/videos auto nosuid,nodev,nofail,x-gvfs-show,umask=000,flush,noatime 0 0\n"
-        else:
-            print("   ⚠️ Pendrive nao detectado, preparando entrada generica /dev/sda1.")
-            line = "\n# Montagem automatica do Pendrive Daora Kids\n/dev/sda1 /mnt/videos auto nosuid,nodev,nofail,x-gvfs-show,umask=000,flush,noatime 0 0\n"
-        
-        if line:
-            # APPEND SEGURO: Nunca sobrescreve, apenas anexa ao final
-            with open("/tmp/fstab_append", "w") as tmp_f:
-                tmp_f.write(line)
-            run_cmd("cat /tmp/fstab_append | sudo tee -a /etc/fstab", sudo=False)
-            print("   📝 Entrada adicionada ao fstab.")
-    else:
-        print("   ✅ O ponto de montagem /mnt/videos ja esta configurado. Pulando...")
+    # 2. Busca Automática do Dispositivo
+    device = ""
+    for dev in ['sda1', 'sdb1', 'sdc1']:
+        if os.path.exists(f"/dev/{dev}"):
+            device = f"/dev/{dev}"
+            break
     
+    if device:
+        print(f"   🔍 Dispositivo detectado: {device}")
+        res = run_cmd(f"blkid -s UUID -o value {device}", sudo=True, capture=True)
+        uuid = res.stdout.strip() if res.stdout else ""
+        
+        if uuid:
+            print(f"   ✅ UUID encontrado: {uuid}")
+            line = f"UUID={uuid} /mnt/videos auto nosuid,nodev,nofail,x-gvfs-show,umask=000,flush,noatime 0 0"
+        else:
+            print(f"   ⚠️ UUID nao encontrado para {device}, usando caminho direto.")
+            line = f"{device} /mnt/videos auto nosuid,nodev,nofail,x-gvfs-show,umask=000,flush,noatime 0 0"
+        
+        # Adiciona ao fstab
+        run_cmd(f'echo "{line}" | sudo tee -a /etc/fstab', sudo=False)
+        print("   📝 Configuraçao adicionada ao /etc/fstab")
+    else:
+        print("   ❌ ERRO: Nenhum pendrive detectado em /dev/sda1 ou /dev/sdb1!")
+        print("      Certifique-se de que o pendrive esta conectado.")
+
+    # 3. Forçar Montagem
     run_cmd("systemctl daemon-reload", sudo=True)
-    run_cmd("mount -a", sudo=True)
+    print("   🚀 Tentando montar...")
+    mount_res = run_cmd("mount /mnt/videos", sudo=True)
+    
+    if os.path.ismount("/mnt/videos"):
+        print("   ✨ SUCESSO! Pendrive montado em /mnt/videos")
+    else:
+        print("   ⚠️ FALHA na montagem. Tentando montagem generica...")
+        run_cmd("mount -a", sudo=True)
 
     # 6.1 Hardware Watchdog
     print("🐕 Ativando Hardware Watchdog...")
