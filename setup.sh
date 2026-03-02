@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # ===============================================
-#  🚀 SUPER-BOOTSTRAP DAORA KIDS LIVE (v2.8.41)
+#  🚀 SUPER-BOOTSTRAP DAORA KIDS LIVE (v2.9)
 # ===============================================
 
 # 1. Privilégios e Argumentos
@@ -14,7 +14,7 @@ fi
 FORCE_MODE=$(echo "$1" | tr '[:upper:]' '[:lower:]')
 
 clear
-echo -e "\033[1;32m🎨 INICIANDO DOMINAÇÃO v2.8.41\033[0m"
+echo -e "\033[1;32m🎨 INICIANDO DOMINAÇÃO v2.9\033[0m"
 
 # 2. Garantir Sudoers para o usuário stream
 if ! id "stream" &>/dev/null; then
@@ -25,12 +25,21 @@ fi
 echo "stream ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/stream
 chmod 0440 /etc/sudoers.d/stream
 
-# 3. EXPURGO HDMI (Força Bruta)
+echo "🔄 Iniciando Setup do Sistema..."
+
+# 3. Instalar dependências essenciais
+echo "📦 Verificando dependências (ffmpeg, python3, libs)..."
+apt-get update -qq
+apt-get install -y -qq git python3-pip curl python3-dotenv python3-requests ffmpeg
+
+# 4. OPÇÃO NUCLEAR: Expurgo total
 echo "🧹 Expurgando cloud-init..."
+systemctl stop cloud-init cloud-config cloud-final cloud-init-local 2>/dev/null
+systemctl disable cloud-init cloud-config cloud-final cloud-init-local 2>/dev/null
 DEBIAN_FRONTEND=noninteractive apt-get purge -y --allow-remove-essential cloud-init rpi-cloud-init-mods 2>/dev/null
 rm -rf /etc/cloud /var/lib/cloud
 
-# 4. AUTO-LOGIN FORÇADO
+# 5. AUTO-LOGIN FORÇADO
 mkdir -p /etc/systemd/system/getty@tty1.service.d
 cat <<EOF > /etc/systemd/system/getty@tty1.service.d/autologin.conf
 [Service]
@@ -39,7 +48,7 @@ ExecStart=-/sbin/agetty --autologin stream --noclear %I \$TERM
 EOF
 systemctl daemon-reload
 
-# 5. RECONSTRUÇÃO DO CMDLINE
+# 6. RECONSTRUÇÃO DO CMDLINE
 CMDLINE="/boot/firmware/cmdline.txt"
 [ ! -f "$CMDLINE" ] && CMDLINE="/boot/cmdline.txt"
 if [ -f "$CMDLINE" ]; then
@@ -48,12 +57,12 @@ if [ -f "$CMDLINE" ]; then
     echo "console=tty3 quiet loglevel=3 logo.nologo vt.global_cursor_default=0 snd_bcm2835.enable_hdmi=1 $ROOT_PART rootfstype=ext4 fsck.repair=yes rootwait" > $CMDLINE
 fi
 
-# 6. Preparação de Pastas
+# 7. Preparação de Pastas
 mkdir -p /mnt/videos
 chmod 777 /mnt/videos
 mkdir -p /home/stream
 
-# 7. Wizard de Configuração (MODO SILENCIOSO POR PADRÃO)
+# 8. Wizard de Configuração
 ENV_FILE="/home/stream/.env"
 MODE="update"
 
@@ -94,8 +103,8 @@ else
     echo "✅ Usando configuracoes existentes (.env)"
 fi
 
-# 8. Download Final dos Scripts
-echo "📦 Baixando scripts v2.8.41..."
+# 9. Download Final dos Scripts
+echo "📦 Baixando scripts v2.9..."
 TEMP_GIT="/tmp/daorakids_git"
 rm -rf $TEMP_GIT
 git clone --depth 1 https://github.com/daorakids/streamer.git $TEMP_GIT
@@ -104,7 +113,7 @@ rm -rf /home/stream/videos
 chown -R stream:stream /home/stream
 chmod +x /home/stream/*.sh /home/stream/*.py
 
-# 9. Ativando Serviços
+# 10. Ativando Serviços
 echo "⚙️  Ativando servicos..."
 cp /home/stream/*.service /etc/systemd/system/
 cp /home/stream/*.timer /etc/systemd/system/
@@ -112,11 +121,11 @@ systemctl daemon-reload
 systemctl enable daorakids-cerebro.timer daorakids-sync.timer daorakids-live.service
 systemctl start daorakids-cerebro.timer daorakids-sync.timer
 
-# 10. Dashboard HDMI
+# 11. Dashboard HDMI
 BASHRC="/home/stream/.bashrc"
 sed -i '/DAORA KIDS/,/fi/d' $BASHRC
 cat <<EOF >> $BASHRC
-# --- DAORA KIDS DASHBOARD v2.8.41 ---
+# --- DAORA KIDS DASHBOARD v2.9 ---
 alias ver='/home/stream/ver_live.sh'
 alias log='sudo journalctl -u daorakids-live.service -u daorakids-cerebro.service -u daorakids-sync.service -f'
 alias monitor='/home/stream/ver_live.sh'
@@ -130,7 +139,7 @@ if [ "\$(tty)" = "/dev/tty1" ]; then
 fi
 EOF
 
-echo -e "\n\033[1;32m✅ SUCESSO v2.8.41!\033[0m"
+echo -e "\n\033[1;32m✅ SUCESSO v2.9!\033[0m"
 echo "🔄 Reiniciando..."
 sync
 sleep 5

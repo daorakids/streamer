@@ -16,7 +16,7 @@ def run_cmd(cmd, sudo=False, capture=False):
 
 def setup_wizard():
     print("\n" + "="*40)
-    print(" 🎨 INSTALADOR/UPDATER DAORA KIDS v2.8.41 ")
+    print(" 🎨 INSTALADOR/UPDATER DAORA KIDS v2.9 ")
     print("="*40 + "\n")
 
     BASE_DIR = "/home/stream"
@@ -127,7 +127,7 @@ WantedBy=multi-user.target
     # 7. Dashboard .bashrc
     bashrc_path = "/home/stream/.bashrc"
     bashrc_addon = """
-# --- DAORA KIDS DASHBOARD v2.8.41 ---
+# --- DAORA KIDS DASHBOARD v2.9 ---
 alias ver='/home/stream/ver_live.sh'
 alias log='sudo journalctl -u daorakids-live.service -u daorakids-cerebro.service -u daorakids-sync.service -f'
 alias monitor='/home/stream/ver_live.sh'
@@ -150,7 +150,7 @@ fi
     print("🧠 Inicializando Cerebro...")
     run_cmd(f"sudo -u stream /usr/bin/python3 {BASE_DIR}/cerebro.py")
     
-    print("\n✅ Setup v2.8.41 concluído! Reiniciando em 5s...")
+    print("\n✅ Setup v2.9 concluído! Reiniciando em 5s...")
     run_cmd("sync", sudo=True)
     time.sleep(5)
     run_cmd("reboot", sudo=True)

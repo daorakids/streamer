@@ -105,10 +105,10 @@ def get_current_slot():
     return slot
 
 def main():
-    log_debug("--- INICIANDO CEREBRO v2.8.40 ---")
+    log_debug("--- INICIANDO CEREBRO v2.9 ---")
     update_schedule_from_web()
     
-    # VALIDACAO DE PRONTIDAO (Sugestao do usuario)
+    # VALIDACAO DE PRONTIDAO
     missing = check_all_languages_ready()
     if missing:
         log_debug(f"⏳ Aguardando sincronismo inicial. Faltam: {', '.join(missing)}")
