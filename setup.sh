@@ -1,20 +1,22 @@
 #!/bin/bash
 
 # ===============================================
-#  🚀 SUPER-BOOTSTRAP DAORA KIDS LIVE (v2.8.38)
+#  🚀 SUPER-BOOTSTRAP DAORA KIDS LIVE (v2.8.39)
 # ===============================================
 
-# 1. Privilégios
+# 1. Privilégios e Argumentos
 if [ "$(id -u)" -ne 0 ]; then
     echo "🚨 Rode com sudo!"
     exit 1
 fi
 
+# Detecta modo forçado via argumento ($1)
+FORCE_MODE=$(echo "$1" | tr '[:upper:]' '[:lower:]')
+
 clear
-echo -e "\033[1;32m🎨 INICIANDO DOMINAÇÃO v2.8.38\033[0m"
+echo -e "\033[1;32m🎨 INICIANDO DOMINAÇÃO v2.8.39\033[0m"
 
 # 2. Garantir Sudoers para o usuário stream
-echo "👤 Configurando privilegios do usuario stream..."
 if ! id "stream" &>/dev/null; then
     useradd -m -s /bin/bash stream
     echo "stream:stream" | chpasswd
@@ -25,15 +27,10 @@ chmod 0440 /etc/sudoers.d/stream
 
 # 3. EXPURGO HDMI (Força Bruta)
 echo "🧹 Expurgando cloud-init..."
-# Desativa os serviços antes de remover
-systemctl stop cloud-init cloud-config cloud-final cloud-init-local 2>/dev/null
-systemctl disable cloud-init cloud-config cloud-final cloud-init-local 2>/dev/null
-# Remove os pacotes e configurações
-DEBIAN_FRONTEND=noninteractive apt-get purge -y --allow-remove-essential cloud-init rpi-cloud-init-mods
+DEBIAN_FRONTEND=noninteractive apt-get purge -y --allow-remove-essential cloud-init rpi-cloud-init-mods 2>/dev/null
 rm -rf /etc/cloud /var/lib/cloud
 
-# 4. AUTO-LOGIN FORÇADO (Direct systemd override)
-echo "🖥️  Forcando Auto-login no tty1..."
+# 4. AUTO-LOGIN FORÇADO
 mkdir -p /etc/systemd/system/getty@tty1.service.d
 cat <<EOF > /etc/systemd/system/getty@tty1.service.d/autologin.conf
 [Service]
@@ -43,7 +40,6 @@ EOF
 systemctl daemon-reload
 
 # 5. RECONSTRUÇÃO DO CMDLINE
-echo "🔇 Reconstruindo cmdline.txt..."
 CMDLINE="/boot/firmware/cmdline.txt"
 [ ! -f "$CMDLINE" ] && CMDLINE="/boot/cmdline.txt"
 if [ -f "$CMDLINE" ]; then
@@ -57,17 +53,15 @@ mkdir -p /mnt/videos
 chmod 777 /mnt/videos
 mkdir -p /home/stream
 
-# 7. Wizard de Configuração
-echo -e "\n\033[1;33m📝 CONFIGURAÇÃO DE CREDENCIAIS\033[0m"
+# 7. Wizard de Configuração (MODO SILENCIOSO POR PADRÃO)
 ENV_FILE="/home/stream/.env"
+MODE="update"
 
-if [ -f "$ENV_FILE" ]; then
-    echo -n "⚠️  Instalacao detectada! Deseja [U] Atualizar ou [R] Reconfigurar? (U/R): "
-    read choice < /dev/tty
-    [ "$choice" != "U" ] && [ "$choice" != "u" ] && MODE="reconfig"
-else
+if [ "$FORCE_MODE" == "reconfig" ] || [ ! -f "$ENV_FILE" ]; then
     MODE="reconfig"
 fi
+
+echo -e "\n\033[1;33m📝 CONFIGURAÇÃO (Modo: $MODE)\033[0m"
 
 if [ "$MODE" == "reconfig" ]; then
     OLD_SYNC_URL=$(grep "SYNC_URL=" $ENV_FILE 2>/dev/null | cut -d'"' -f2)
@@ -96,10 +90,12 @@ SYNC_USER="$sync_user"
 SYNC_PASS="$sync_pass"
 EOF
     chown stream:stream $ENV_FILE
+else
+    echo "✅ Usando configuracoes existentes (.env)"
 fi
 
 # 8. Download Final dos Scripts
-echo "📦 Baixando scripts atualizados..."
+echo "📦 Baixando scripts v2.8.39..."
 TEMP_GIT="/tmp/daorakids_git"
 rm -rf $TEMP_GIT
 git clone --depth 1 https://github.com/daorakids/streamer.git $TEMP_GIT
@@ -114,15 +110,13 @@ cp /home/stream/*.service /etc/systemd/system/
 cp /home/stream/*.timer /etc/systemd/system/
 systemctl daemon-reload
 systemctl enable daorakids-cerebro.timer daorakids-sync.timer daorakids-live.service
-# Inicia imediatamente
 systemctl start daorakids-cerebro.timer daorakids-sync.timer
 
-# 10. Dashboard HDMI e Atalhos
-echo "📊 Configurando Dashboard..."
+# 10. Dashboard HDMI
 BASHRC="/home/stream/.bashrc"
 sed -i '/DAORA KIDS/,/fi/d' $BASHRC
 cat <<EOF >> $BASHRC
-# --- DAORA KIDS DASHBOARD v2.8.38 ---
+# --- DAORA KIDS DASHBOARD v2.8.39 ---
 alias ver='/home/stream/ver_live.sh'
 alias log='sudo journalctl -u daorakids-live.service -u daorakids-cerebro.service -u daorakids-sync.service -f'
 alias monitor='/home/stream/ver_live.sh'
@@ -136,8 +130,8 @@ if [ "\$(tty)" = "/dev/tty1" ]; then
 fi
 EOF
 
-echo -e "\n\033[1;32m✅ SUCESSO v2.8.38!\033[0m"
-echo "🔄 Reiniciando para dominar o HDMI e o Sync..."
+echo -e "\n\033[1;32m✅ SUCESSO v2.8.39!\033[0m"
+echo "🔄 Reiniciando..."
 sync
 sleep 5
 reboot
