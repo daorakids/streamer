@@ -42,8 +42,9 @@ def setup_wizard():
             run_cmd("echo 'nameserver 8.8.8.8' | sudo tee /etc/resolv.conf", sudo=False)
             run_cmd("echo 'nameserver 1.1.1.1' | sudo tee -a /etc/resolv.conf", sudo=False)
         
-            yt_pt = input("Chave YouTube (PT): ").strip()        yt_en = input("Chave YouTube (EN): ").strip()
-        yt_es = input("Chave YouTube (ES): ").strip()
+            yt_pt = input("Chave YouTube (PT): ").strip()
+            yt_en = input("Chave YouTube (EN): ").strip()
+            yt_es = input("Chave YouTube (ES): ").strip()
 
         # 2. Telegram
         tg_token = input("Token do Bot Telegram: ").strip()
@@ -148,9 +149,6 @@ ExecStart=-/sbin/agetty --autologin stream --noclear %I $TERM
     print("\n✅ Operação concluída com sucesso!")
     print("🔄 O sistema irá reiniciar em 10 segundos...")
     run_cmd("sleep 10 && sudo reboot", sudo=False) # reboot já é chamado via sudo se necessário na func
-
-if __name__ == "__main__":
-    setup_wizard()
 
 if __name__ == "__main__":
     setup_wizard()
