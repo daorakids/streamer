@@ -156,9 +156,16 @@ def main():
         else:
             video_dir = find_video_dir(target_lang)
             if not video_dir:
-                log_debug(f"❌ Pasta '{target_lang}' nao encontrada em {VIDEO_ROOT}!")
+                log_debug(f"❌ ERRO CRITICO: Pasta de videos '{target_lang}' nao encontrada em {VIDEO_ROOT}!")
+                # Grava um arquivo temporario para o iniciar_live.sh saber o erro real
+                with open(CONFIG_FILE + ".error", 'w') as f:
+                    f.write(f"Pasta '{target_lang.upper()}' nao encontrada no pendrive.")
                 if os.path.exists(CONFIG_FILE): os.remove(CONFIG_FILE)
                 return
+            
+            # Limpa erro se a pasta foi achada
+            if os.path.exists(CONFIG_FILE + ".error"): os.remove(CONFIG_FILE + ".error")
+            
             try:
                 with open(CONFIG_FILE, 'w') as f:
                     f.write(f'CHAVE="{target_key}"\n')

@@ -49,8 +49,13 @@ while true; do
         source "$CONFIG_FILE"
     else
         HORA_AGORA=$(date +'%H:%M')
-        echo "💤 [$HORA_AGORA] Fora do horario de transmissao ou aguardando agenda..."
-        echo "   (Dica: Use 'log' para ver o relogio do Cerebro)"
+        if [ -f "$CONFIG_FILE.error" ]; then
+            ERROR_MSG=$(cat "$CONFIG_FILE.error")
+            echo "🚨 [$HORA_AGORA] ERRO: $ERROR_MSG"
+            echo "   (Verificando novamente em 60s...)"
+        else
+            echo "💤 [$HORA_AGORA] Fora do horario de transmissao (Agenda)."
+        fi
         sleep 60
         continue
     fi
