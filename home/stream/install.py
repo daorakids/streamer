@@ -113,8 +113,9 @@ def setup_wizard():
     run_cmd("systemctl enable --now watchdog", sudo=True)
 
     # 7. Serviços
+    print("⚙️  Configurando servicos do systemd...")
     sync_service = f"""[Unit]
-Description=Sincroniza videos do site para o Pi
+Description=Daora Kids Sync Service
 After=network-online.target
 Wants=network-online.target
 
@@ -124,6 +125,9 @@ User=stream
 ExecStart=/usr/bin/wget --user={sync_user} --password={sync_pass} -c -N -r -np -nH --cut-dirs={cut_dirs} -A mp4 --tries=10 -P /mnt/videos {sync_url}
 Restart=on-failure
 RestartSec=30s
+
+[Install]
+WantedBy=multi-user.target
 """
     with open("/tmp/daorakids-sync.service", "w") as f:
         f.write(sync_service)
@@ -150,6 +154,7 @@ WantedBy=multi-user.target
     run_cmd("cp /tmp/daorakids-live.service /etc/systemd/system/daorakids-live.service", sudo=True)
 
     # 8. Logs & Monitor
+    print("📊 Configurando permissoes de logs e monitoramento...")
     with open("/tmp/daorakids-logs", "w") as f:
         f.write("stream ALL=(ALL) NOPASSWD: /usr/bin/journalctl, /usr/bin/systemctl, /usr/bin/tail\n")
     run_cmd("cp /tmp/daorakids-logs /etc/sudoers.d/daorakids-logs", sudo=True)
