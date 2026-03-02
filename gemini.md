@@ -1,18 +1,19 @@
-# Projeto Daora Kids v2.8.25 📺🍿
+# Projeto Daora Kids v2.8.31 📺🍿
 
-**Status:** v2.8.25 - Prontidão Total e Wget Inteligente (Fim dos re-downloads).
+**Status:** v2.8.31 - Sincronismo Duplo (Boot + Hora Cheia) e Arquivos Físicos Garantidos.
 
 ## 🚀 Arquitetura Atual (Sincronização Remota)
 
-1.  **Auto-login & Sistema (Mega Bootstrap v2.8.25):**
-    - **Prontidão Total:** Cérebro agora aguarda o download de todas as pastas (PT, EN, ES) antes de iniciar a primeira transmissão.
-    - **Wget Inteligente:** Fim dos downloads repetitivos e falsos positivos no pendrive (FAT32/exFAT).
-    - **Credenciais de Sync:** Registro automático de usuário/senha no `.env`.
-    - **Diagnóstico Honesto:** Mensagens claras para "Pasta Faltando" vs "Fora de Horário".
+1.  **Auto-login & Sistema (Mega Bootstrap v2.8.31):**
+    - **Sincronismo Inteligente:** O Pi agora sincroniza 2 min após o boot e repete exatamente no início de cada hora cheia.
+    - **Arquivos Físicos:** Serviços e timers agora possuem arquivos físicos no repositório para garantir instalação sem erros de recursos.
+    - **Dominação HDMI:** Expurgo total de cloud-init e mensagens de boot limpas.
+    - **Prontidão Total:** Live aguarda download de todas as pastas (PT, EN, ES) antes de iniciar.
 
 2.  **Monitor de Transmissão (`ver_live.sh`):**
-    - **Dashboard HDMI:** Inicia sozinho no boot físico com tela limpa.
-    - **Logs Consolidados:** Comando `log` unificado (Live + Cerebro + Sync).
+    - **Comandos Globais:** `daora-start` e `daora-stop` para gestão fácil dos serviços.
+    - **HDMI Dashboard:** Tela preta limpa que inicia o monitor automaticamente.
+    - **Logs Consolidados:** `log` unificado (Live + Cerebro + Sync).
 
 
 2.  **Monitor de Transmissão (`ver_live.sh`):**
