@@ -1,33 +1,37 @@
-# Daora Kids v2.2 📺🍿
+# Daora Kids v2.8.10 📺🍿
 
 Sistema de Streaming Kids 24/7 (Raspberry Pi 3) - Blindado e Totalmente Remoto.
 
 ## 🚀 Como Instalar ou Atualizar (Zero-Touch Setup)
 
-1. **Nova Instalação:** Instale o **Raspberry Pi OS Legacy 64-Bit** (Lite), conecte via SSH e rode o comando de "Autocura" (que ignora o cache e tenta destravar o disco):
-   ```bash
-   sudo mount -o remount,rw / && curl -sSL "https://raw.githubusercontent.com/daorakids/streamer/main/setup.sh?$(date +%s)" | sudo bash
-   ```
-2. **Atualização:** Rode o mesmo comando acima. O instalador detectará a versão anterior e oferecerá o **Modo [U]pdate**, que atualiza os scripts e serviços preservando suas chaves de API (`.env`).
-3. O Bootstrap baixará o código e iniciará o Wizard (`install.py`). Siga as instruções na tela.
+Para instalar ou atualizar para a versão mais recente (**v2.8.10**), rode o comando abaixo no terminal do Raspberry:
 
-## 📺 Monitoramento em Tempo Real
+```bash
+sudo bash -c "$(curl -sSL https://raw.githubusercontent.com/daorakids/streamer/main/setup.sh?v=$RANDOM)"
+```
 
-O sistema agora conta com um painel de monitoramento amigável que inicia automaticamente ao fazer login no terminal (SSH ou HDMI).
+### O que há de novo na v2.8.10:
+*   **Wizard Bash Estável:** Configuração inicial via Bash para evitar travamentos de teclado.
+*   **Montagem Blindada:** Registro seguro no `fstab` via UUID com detecção automática de portas USB.
+*   **Cérebro Independente:** Agendamento via Systemd Timer e detecção de datas em Inglês (Locale-Independent).
+*   **HDMI Dashboard:** O monitor de transmissão abre automaticamente no HDMI logo após o boot.
+
+## 📺 Monitoramento em Tempo Real (HDMI Dashboard)
+
+O sistema conta com um painel de monitoramento amigável que inicia automaticamente no terminal físico (HDMI).
 
 - **Comando Rápido:** Digite `ver` ou `monitor` a qualquer momento para ver o status da transmissão.
-- **O que ele mostra:** 
-  - Idioma atual e Modo de exibição.
-  - Logs da Live (FFmpeg), Cérebro (Agenda) e Sincronizador (Download de vídeos).
-  - Filtro inteligente que remove o ruído do FFmpeg para focar em eventos importantes.
+- **Auto-Start HDMI:** Ao ligar o Raspberry em uma TV, o dashboard aparecerá sozinho.
+- **Logs Consolidados:** Use o comando `log` para seguir o que FFmpeg e Cérebro estão fazendo.
 
 ## 🧠 Arquitetura (Cérebro + Bash)
 
-O sistema opera com um "Cérebro" em Python (`cerebro.py`) rodando via Cron a cada 5 minutos, que coordena um "Braço" em Bash (`iniciar_live.sh`) responsável pelo FFmpeg.
+O sistema opera com um "Cérebro" em Python (`cerebro.py`) rodando via **Systemd Timer** a cada 5 minutos, que coordena um "Braço" em Bash (`iniciar_live.sh`) responsável pelo FFmpeg.
 
 ### 🔄 Sincronização Automática
-- **Agenda (`schedule.json`):** O `cerebro.py` baixa a agenda do servidor a cada 5 minutos. Se houver qualquer mudança no slot de transmissão atual (Idioma, Modo ou Chave), a live é reiniciada instantaneamente com a nova configuração.
-- **Vídeos (`.mp4`):** O serviço `daorakids-sync.service` sincroniza os vídeos via `wget` a cada 1 hora, mantendo o Pendrive atualizado.
+- **Agenda (`schedule.json`):** O `cerebro.py` baixa a agenda do servidor a cada 5 minutos. Se houver qualquer mudança no slot de transmissão atual (Idioma, Modo ou Chave), a live é reiniciada instantaneamente.
+- **Resiliência:** O Cérebro garante a criação do arquivo de configuração mesmo em casos de reboot ou falha de rede.
+- **Vídeos (`.mp4`):** O serviço `daorakids-sync.service` sincroniza os vídeos via `wget` a cada 1 hora.
 
 ## 📂 Configuração do Servidor
 
@@ -43,11 +47,12 @@ Para o Raspberry sincronizar, seu servidor (Apache/Nginx) deve permitir a listag
    ```
 
 2. **O arquivo `schedule.json`:**
-   Este arquivo controla tudo remotamente. Você pode definir horários semanais, datas especiais e chaves. A busca das pastas de vídeo no pendrive é *case-insensitive*.
+   Este arquivo controla tudo remotamente. Você pode definir horários semanais, datas especiais e chaves.
 
 ## 🩺 Manutenção e Saúde
-- **Notificações:** Alertas de erro no Pendrive, troca de idioma e status da live via Telegram.
-- **Resiliência:** O loop Bash garante o FFmpeg reinicie automaticamente em caso de falha de conexão.
+- **Notificações:** Alertas de troca de idioma e status da live via Telegram.
+- **Hardware Watchdog:** O sistema monitora a si mesmo e reinicia o hardware se houver travamento total.
+- **Log2Ram (Opcional):** Protege o cartão SD movendo logs para a memória RAM.
 
 ---
 Desenvolvido por Bruno Grange.
