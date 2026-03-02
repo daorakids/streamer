@@ -10,17 +10,19 @@ from dotenv import load_dotenv
 
 def run_cmd(cmd, sudo=False):
     if sudo: cmd = f"sudo {cmd}"
-    return subprocess.run(cmd, shell=True, capture_output=True, text=True)
+    # Não capturamos output aqui para evitar travamentos em pedidos de senha
+    return subprocess.run(cmd, shell=True, text=True)
 
 def get_input(prompt, required=True):
-    # Dá um "Beep" sutil para chamar a atenção no terminal
-    print("\a", end="", flush=True) 
     while True:
-        val = input(prompt).strip()
-        if required and not val:
-            print("⚠️  Este campo é obrigatório. Por favor, digite um valor.")
-            continue
-        return val
+        try:
+            val = input(prompt).strip()
+            if required and not val:
+                print("⚠️  Este campo é obrigatório. Por favor, digite um valor.")
+                continue
+            return val
+        except EOFError:
+            return ""
 
 def setup_wizard():
     print("\n" + "="*40)

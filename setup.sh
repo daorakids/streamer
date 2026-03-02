@@ -32,8 +32,10 @@ fi
 if ! id "stream" &>/dev/null; then
     echo "👤 Criando usuário 'stream'..."
     useradd -m -s /bin/bash stream
-    echo "stream:stream" | chpasswd # Senha temporária, você mudará no install.py
+    echo "stream:stream" | chpasswd
     usermod -aG sudo,video,audio stream
+    # Permitir sudo sem senha para o stream facilitar a instalação
+    echo "stream ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/stream
 fi
 
 # 4. Definir Pastas
