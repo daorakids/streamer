@@ -28,7 +28,7 @@ def get_input(prompt, required=True):
 
 def setup_wizard():
     print("\n" + "="*40)
-    print(" 🎨 INSTALADOR/UPDATER DAORA KIDS v2.8.5 ")
+    print(" 🎨 INSTALADOR/UPDATER DAORA KIDS v2.8.6 ")
     print("="*40 + "\n")
 
     # Detecta se é Update ou Nova Instalação
@@ -126,6 +126,34 @@ def setup_wizard():
 
     # 7. Serviços
     print("⚙️  Configurando servicos do systemd...")
+    
+    # 7.1 Cérebro (Agenda) - Roda a cada 5 minutos
+    cerebro_service = f"""[Unit]
+Description=Daora Kids Cerebro Service
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=stream
+WorkingDirectory={BASE_DIR}
+ExecStart=/usr/bin/python3 {BASE_DIR}/cerebro.py
+"""
+    cerebro_timer = """[Unit]
+Description=Daora Kids Cerebro Timer
+
+[Timer]
+OnBootSec=1min
+OnUnitActiveSec=5min
+Unit=daorakids-cerebro.service
+
+[Install]
+WantedBy=timers.target
+"""
+    with open("/tmp/daorakids-cerebro.service", "w") as f: f.write(cerebro_service)
+    with open("/tmp/daorakids-cerebro.timer", "w") as f: f.write(cerebro_timer)
+    run_cmd("cp /tmp/daorakids-cerebro.* /etc/systemd/system/", sudo=True)
+
+    # 7.2 Sincronizador de Vídeos
     sync_service = f"""[Unit]
 Description=Daora Kids Sync Service
 After=network-online.target
@@ -141,6 +169,7 @@ RestartSec=30s
 [Install]
 WantedBy=multi-user.target
 """
+    # ... rest of services ...
     with open("/tmp/daorakids-sync.service", "w") as f:
         f.write(sync_service)
     run_cmd("cp /tmp/daorakids-sync.service /etc/systemd/system/daorakids-sync.service", sudo=True)
@@ -191,8 +220,14 @@ WantedBy=multi-user.target
             run_cmd("curl -L https://github.com/azlux/log2ram/archive/master.tar.gz | tar zx && cd log2ram-master && sudo ./install.sh", sudo=False)
 
     run_cmd("systemctl daemon-reload", sudo=True)
+    run_cmd("systemctl enable daorakids-cerebro.timer", sudo=True)
+    run_cmd("systemctl start daorakids-cerebro.timer", sudo=True)
     run_cmd("systemctl enable daorakids-sync.timer", sudo=True)
     run_cmd("systemctl enable daorakids-live.service", sudo=True)
+
+    # Roda o Cérebro uma vez agora para já criar o .current_config
+    print("🧠 Inicializando configuracoes do Cerebro...")
+    run_cmd(f"sudo -u stream /usr/bin/python3 {BASE_DIR}/cerebro.py")
     
     print("\n✅ Operação concluída!")
     run_cmd("sync", sudo=True)
