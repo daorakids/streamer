@@ -168,7 +168,7 @@ WantedBy=multi-user.target
     run_cmd("cp /tmp/daorakids-live.service /etc/systemd/system/daorakids-live.service", sudo=True)
 
     # 8. Logs & Monitor
-    run_cmd("cp /tmp/daorakids-logs /etc/sudoers.d/daorakids-logs", sudo=True) 2>/dev/null
+    run_cmd("cp /tmp/daorakids-logs /etc/sudoers.d/daorakids-logs", sudo=True)
     
     bashrc_path = "/home/stream/.bashrc"
     with open(bashrc_path, "r") as f:
