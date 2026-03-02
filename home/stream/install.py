@@ -28,7 +28,7 @@ def get_input(prompt, required=True):
 
 def setup_wizard():
     print("\n" + "="*40)
-    print(" 🎨 INSTALADOR/UPDATER DAORA KIDS v2.8.15 ")
+    print(" 🎨 INSTALADOR/UPDATER DAORA KIDS v2.8.16 ")
     print("="*40 + "\n")
 
     # Detecta se é Update ou Nova Instalação
@@ -217,44 +217,53 @@ fi
             with open(bashrc_path, "a") as f_a:
                 f_a.write(bashrc_addon)
 
-    # 10. Auto-login (Forca Bruta v2.8.15) & Log2Ram
+    # 10. Auto-login (Opcao Nuclear v2.8.16) & Log2Ram
     print("🖥️  Configurando Auto-login REAL no console (HDMI)...")
-    # 1. Desativa cloud-init para parar de sujar a tela
-    run_cmd("systemctl disable cloud-init.service cloud-init-local.service cloud-config.service cloud-final.service", sudo=True)
-    run_cmd("touch /etc/cloud/cloud-init.disabled", sudo=True)
+    # 1. Purgar cloud-init para parar de sujar a tela de vez
+    run_cmd("apt-get purge -y cloud-init", sudo=True)
+    run_cmd("rm -rf /etc/cloud /var/lib/cloud", sudo=True)
 
-    # 2. Cria o override manual do Getty (TTY1) ignorando raspi-config
-    autologin_dir = "/etc/systemd/system/getty@tty1.service.d"
-    run_cmd(f"mkdir -p {autologin_dir}", sudo=True)
-    with open("/tmp/autologin.conf", "w") as f:
-        f.write("[Service]\nExecStart=\nExecStart=-/sbin/agetty --autologin stream --noclear %I $TERM\n")
-    run_cmd(f"cp /tmp/autologin.conf {autologin_dir}/autologin.conf", sudo=True)
+    # 2. Cria o override manual do Getty (TTY1) com comando unico garantido
+    run_cmd("mkdir -p /etc/systemd/system/getty@tty1.service.d", sudo=True)
+    run_cmd('printf "[Service]\\nExecStart=\\nExecStart=-/sbin/agetty --autologin stream --noclear %%I $TERM\\n" | sudo tee /etc/systemd/system/getty@tty1.service.d/autologin.conf', sudo=False)
 
-    # 11. Silenciador de Boot (Limpeza do HDMI)
-    print("🔇 Silenciando mensagens de boot no HDMI...")
-    cmdline = "/boot/firmware/cmdline.txt"
-    if not os.path.exists(cmdline): cmdline = "/boot/cmdline.txt"
-    if os.path.exists(cmdline):
-        with open(cmdline, "r") as f:
-            content = f.read().strip()
-        if "quiet" not in content:
-            # Limpa console=tty1 e adiciona quiet loglevel=3
-            new_params = "quiet loglevel=3 logo.nologo vt.global_cursor_default=0"
-            content = content.replace("console=tty1", "console=tty3")
-            with open("/tmp/cmdline.txt", "w") as f: f.write(content + " " + new_params + "\n")
-            run_cmd(f"cp /tmp/cmdline.txt {cmdline}", sudo=True)
+    # 11. Reconstruir Cmdline (Limpeza Profunda do HDMI)
+    print("🔇 Reconstruindo cmdline.txt para boot limpo e HDMI ligado...")
+    cmdline_path = "/boot/firmware/cmdline.txt"
+    if not os.path.exists(cmdline_path): cmdline_path = "/boot/cmdline.txt"
+    
+    if os.path.exists(cmdline_path):
+        # Remonta boot como RW por seguranca
+        run_cmd(f"mount -o remount,rw $(dirname {cmdline_path})", sudo=True)
+        
+        with open(cmdline_path, "r") as f:
+            orig = f.read().strip()
+        
+        # Filtra lixo e duplicatas
+        parts = orig.split()
+        clean_parts = []
+        for p in parts:
+            if any(x in p for x in ["console=", "quiet", "loglevel", "logo.nologo", "enable_hdmi", "vt.global_cursor"]):
+                continue
+            clean_parts.append(p)
+        
+        # Adiciona nossa configuracao ideal
+        new_line = " ".join(clean_parts) + " console=tty3 quiet loglevel=3 logo.nologo vt.global_cursor_default=0 snd_bcm2835.enable_hdmi=1"
+        
+        with open("/tmp/cmdline.txt", "w") as f: f.write(new_line + "\n")
+        run_cmd(f"cp /tmp/cmdline.txt {cmdline_path}", sudo=True)
 
     # 12. Ajuste no Dashboard (Atraso para estabilidade)
     bashrc_path = "/home/stream/.bashrc"
     bashrc_addon = """
-# --- DAORA KIDS AUTO-MONITOR v2.8.15 ---
+# --- DAORA KIDS AUTO-MONITOR v2.8.16 ---
 alias ver='/home/stream/ver_live.sh'
 alias log='sudo journalctl -u daorakids-live.service -u daorakids-cerebro.service -u daorakids-sync.service -f'
 alias monitor='/home/stream/ver_live.sh'
 
 # Inicia o monitor automaticamente apenas no terminal físico (HDMI)
 if [ "$(tty)" = "/dev/tty1" ]; then
-    sleep 2 # Espera o sistema "assentar"
+    sleep 3 # Espera o sistema carregar tudo
     clear
     /home/stream/ver_live.sh
 fi
