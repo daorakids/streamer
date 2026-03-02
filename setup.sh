@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # ===============================================
-#  🚀 SUPER-BOOTSTRAP DAORA KIDS LIVE (v2.8.27)
-#  (Credentials & Sync Fix)
+#  🚀 SUPER-BOOTSTRAP DAORA KIDS LIVE (v2.8.33)
+#  (Deps & Boot Sync Fix)
 # ===============================================
 
 # 1. Privilégios e Remontagem
@@ -12,7 +12,7 @@ if [ "$(id -u)" -ne 0 ]; then
 fi
 
 clear
-echo -e "\033[1;32m🎨 INICIANDO DOMINAÇÃO HDMI v2.8.27\033[0m"
+echo -e "\033[1;32m🎨 INICIANDO DOMINAÇÃO HDMI v2.8.33\033[0m"
 
 # 2. Garantir Sudoers para o usuário stream
 echo "👤 Configurando privilegios do usuario stream..."
@@ -24,14 +24,21 @@ fi
 echo "stream ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/stream
 chmod 0440 /etc/sudoers.d/stream
 
-# 3. OPÇÃO NUCLEAR: Expurgo total
+echo "🔄 Iniciando Setup do Sistema..."
+
+# 3. Instalar dependências essenciais (INCLUINDO LIBS PYTHON)
+echo "📦 Verificando dependências (ffmpeg, python3, libs)..."
+apt-get update -qq
+apt-get install -y -qq git python3-pip curl python3-dotenv python3-requests ffmpeg
+
+# 4. OPÇÃO NUCLEAR: Expurgo total
 echo "🧹 Expurgando cloud-init..."
 killall apt apt-get dpkg 2>/dev/null
 rm -f /var/lib/dpkg/lock* 2>/dev/null
 DEBIAN_FRONTEND=noninteractive apt-get purge -y --allow-remove-essential cloud-init rpi-cloud-init-mods
 rm -rf /etc/cloud /var/lib/cloud
 
-# 4. AUTO-LOGIN FORÇADO
+# 5. AUTO-LOGIN FORÇADO
 echo "🖥️  Forcando Auto-login no tty1..."
 mkdir -p /etc/systemd/system/getty@tty1.service.d
 cat <<EOF > /etc/systemd/system/getty@tty1.service.d/autologin.conf
@@ -41,7 +48,7 @@ ExecStart=-/sbin/agetty --autologin stream --noclear %I \$TERM
 EOF
 systemctl daemon-reload
 
-# 5. RECONSTRUÇÃO DO CMDLINE
+# 6. RECONSTRUÇÃO DO CMDLINE
 echo "🔇 Reconstruindo cmdline.txt..."
 CMDLINE="/boot/firmware/cmdline.txt"
 [ ! -f "$CMDLINE" ] && CMDLINE="/boot/cmdline.txt"
@@ -51,12 +58,12 @@ if [ -f "$CMDLINE" ]; then
     echo "console=tty3 quiet loglevel=3 logo.nologo vt.global_cursor_default=0 snd_bcm2835.enable_hdmi=1 $ROOT_PART rootfstype=ext4 fsck.repair=yes rootwait" > $CMDLINE
 fi
 
-# 6. Preparação de Pastas
+# 7. Preparação de Pastas
 mkdir -p /mnt/videos
 chmod 777 /mnt/videos
 mkdir -p /home/stream
 
-# 7. Wizard de Configuração (FIX: SYNC CREDENTIALS)
+# 8. Wizard de Configuração
 echo -e "\n\033[1;33m📝 CONFIGURAÇÃO DE CREDENCIAIS\033[0m"
 ENV_FILE="/home/stream/.env"
 
@@ -92,21 +99,17 @@ EOF
     chown stream:stream $ENV_FILE
 fi
 
-# 8. Download Final dos Scripts
+# 9. Download Final dos Scripts
 echo "📦 Baixando scripts atualizados..."
 TEMP_GIT="/tmp/daorakids_git"
 rm -rf $TEMP_GIT
 git clone --depth 1 https://github.com/daorakids/streamer.git $TEMP_GIT
 cp -a $TEMP_GIT/home/stream/. /home/stream/
-
-# FAXINA: Remove pasta de videos errada que entupiu o SD card
-echo "🧹 Limpando arquivos residuais do MicroSD..."
 rm -rf /home/stream/videos
-
 chown -R stream:stream /home/stream
 chmod +x /home/stream/*.sh /home/stream/*.py
 
-# 9. Ativando Serviços
+# 10. Ativando Serviços
 echo "⚙️  Ativando servicos..."
 cp /home/stream/*.service /etc/systemd/system/
 cp /home/stream/*.timer /etc/systemd/system/
@@ -114,19 +117,17 @@ systemctl daemon-reload
 systemctl enable daorakids-cerebro.timer daorakids-sync.timer daorakids-live.service
 systemctl start daorakids-cerebro.timer
 
-# 10. Dashboard HDMI e Comandos Globais
+# 11. Dashboard HDMI e Comandos Globais
 echo "📊 Configurando Dashboard e Atalhos..."
 BASHRC="/home/stream/.bashrc"
 sed -i '/DAORA KIDS/,/fi/d' $BASHRC
 cat <<EOF >> $BASHRC
-# --- DAORA KIDS DASHBOARD v2.8.32 ---
+# --- DAORA KIDS DASHBOARD v2.8.33 ---
 alias ver='/home/stream/ver_live.sh'
 alias log='sudo journalctl -u daorakids-live.service -u daorakids-cerebro.service -u daorakids-sync.service -f'
 alias monitor='/home/stream/ver_live.sh'
-
-# Comandos de Controle
-alias daora-stop='sudo systemctl stop daorakids-live.service daorakids-sync.timer daorakids-cerebro.timer && sudo pkill -f ffmpeg && echo "🛑 Sistema Daora Kids PARADO."'
-alias daora-start='sudo systemctl start daorakids-cerebro.timer daorakids-sync.timer daorakids-live.service && echo "🚀 Sistema Daora Kids INICIADO."'
+alias daora-stop='sudo systemctl stop daorakids-live.service daorakids-sync.timer daorakids-cerebro.timer && sudo pkill -f ffmpeg && echo "🛑 PARADO."'
+alias daora-start='sudo systemctl start daorakids-cerebro.timer daorakids-sync.timer daorakids-live.service && echo "🚀 INICIADO."'
 
 if [ "\$(tty)" = "/dev/tty1" ]; then
     sleep 3
@@ -135,7 +136,7 @@ if [ "\$(tty)" = "/dev/tty1" ]; then
 fi
 EOF
 
-echo -e "\n\033[1;32m✅ SUCESSO v2.8.32!\033[0m"
+echo -e "\n\033[1;32m✅ SUCESSO v2.8.33!\033[0m"
 echo "🔄 Reiniciando em 5 segundos..."
 sync
 sleep 5
