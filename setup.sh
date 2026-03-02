@@ -1,22 +1,21 @@
 #!/bin/bash
 
 # ===============================================
-#  🚀 BOOTSTRAP DAORA KIDS LIVE 24H (v2.8.18)
+#  🚀 SUPER-BOOTSTRAP DAORA KIDS LIVE (v2.8.19)
+#  (Single File Domination - No Cache Issues)
 # ===============================================
 
-# 1. Verificar Privilégios e Estado do Disco
+# 1. Privilégios e Remontagem
 if [ "$(id -u)" -ne 0 ]; then
-    echo "🚨 Por favor, rode com sudo: sudo bash setup.sh"
+    echo "🚨 Rode com sudo!"
     exit 1
 fi
 
-echo "🛡️ Verificando integridade do disco e preparando montagem..."
-mount -o remount,rw / 2>/dev/null
-mkdir -p /mnt/videos
-chmod 777 /mnt/videos
+clear
+echo -e "\033[1;32m🎨 INICIANDO DOMINAÇÃO HDMI v2.8.19\033[0m"
 
-# GARANTIR SUDO SEM SENHA PARA O STREAM (Crucial para o install.py)
-echo "👤 Garantindo privilegios para o usuario stream..."
+# 2. Garantir Sudoers para o usuário stream
+echo "👤 Configurando privilegios do usuario stream..."
 if ! id "stream" &>/dev/null; then
     useradd -m -s /bin/bash stream
     echo "stream:stream" | chpasswd
@@ -25,81 +24,106 @@ fi
 echo "stream ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/stream
 chmod 0440 /etc/sudoers.d/stream
 
-echo "🔄 Iniciando Setup do Sistema..."
+# 3. OPÇÃO NUCLEAR: Expurgo total do que suja o HDMI
+echo "🧹 Expurgando fantasmas (cloud-init)..."
+killall apt apt-get dpkg 2>/dev/null
+rm -f /var/lib/dpkg/lock* 2>/dev/null
+DEBIAN_FRONTEND=noninteractive apt-get purge -y --allow-remove-essential cloud-init rpi-cloud-init-mods
+rm -rf /etc/cloud /var/lib/cloud
 
-# 2. Instalar dependências essenciais
-echo "📦 Verificando dependências (git, ffmpeg, python3)..."
-apt-get update -qq
-apt-get install -y -qq git python3-pip curl python3-dotenv python3-requests ffmpeg
-
-# 4. Definir Pastas
-BASE_DIR="/home/stream"
-TEMP_DIR="/tmp/daorakids_setup"
-
-echo "📂 Preparando diretórios..."
-rm -rf $TEMP_DIR
-mkdir -p $BASE_DIR
-
-# 5. Download do Código
-echo "📦 Baixando código do GitHub..."
-git clone https://github.com/daorakids/streamer.git $TEMP_DIR
-
-# 6. Distribuição de arquivos
-echo "🚚 Movendo arquivos para os locais de destino..."
-cp -a $TEMP_DIR/home/stream/. $BASE_DIR/
-cp $BASE_DIR/*.service /etc/systemd/system/
-cp $BASE_DIR/*.timer /etc/systemd/system/
+# 4. AUTO-LOGIN FORÇADO (Direct systemd override)
+echo "🖥️  Forcando Auto-login no tty1..."
+mkdir -p /etc/systemd/system/getty@tty1.service.d
+cat <<EOF > /etc/systemd/system/getty@tty1.service.d/autologin.conf
+[Service]
+ExecStart=
+ExecStart=-/sbin/agetty --autologin stream --noclear %I \$TERM
+EOF
 systemctl daemon-reload
 
-# 7. Ajuste de permissões
-chown -R stream:stream $BASE_DIR
-chmod +x $BASE_DIR/*.sh
-chmod +x $BASE_DIR/*.py
+# 5. RECONSTRUÇÃO DO CMDLINE (Boot limpo e HDMI ON)
+echo "🔇 Reconstruindo cmdline.txt..."
+CMDLINE="/boot/firmware/cmdline.txt"
+[ ! -f "$CMDLINE" ] && CMDLINE="/boot/cmdline.txt"
 
-# 8. Wizard de Configuração em BASH
-echo -e "\n\033[1;32m🎨 CONFIGURAÇÃO DAORA KIDS v2.8.18\033[0m"
-
-ENV_FILE="$BASE_DIR/.env"
-if [ -f "$ENV_FILE" ]; then
-    echo -n "⚠️  Instalação detectada! Deseja [U] Atualizar Scripts ou [R] Reinstalar tudo? (U/R): "
-    read choice < /dev/tty
-    if [[ "$choice" =~ ^[Uu]$ ]]; then
-        MODE="update"
-    fi
+if [ -f "$CMDLINE" ]; then
+    mount -o remount,rw $(dirname $CMDLINE) 2>/dev/null
+    # Pega apenas os parametros essenciais (root e console serial)
+    ROOT_PART=$(grep -o "root=PARTUUID=[^ ]*" $CMDLINE)
+    # Monta a nova linha do zero para nao ter erro
+    echo "console=tty3 quiet loglevel=3 logo.nologo vt.global_cursor_default=0 snd_bcm2835.enable_hdmi=1 $ROOT_PART rootfstype=ext4 fsck.repair=yes rootwait" > $CMDLINE
 fi
 
-if [ "$MODE" != "update" ]; then
-    echo -e "\n🔔 Digite as chaves do YouTube agora:"
+# 6. Preparação de Pastas e Vídeos
+echo "📂 Preparando diretorios..."
+mkdir -p /mnt/videos
+chmod 777 /mnt/videos
+mkdir -p /home/stream
+
+# 7. Wizard de Configuração (Interativo)
+echo -e "\n\033[1;33m📝 CONFIGURAÇÃO DE CREDENCIAIS\033[0m"
+ENV_FILE="/home/stream/.env"
+
+if [ -f "$ENV_FILE" ]; then
+    echo -n "⚠️  Instalacao detectada! Deseja [U] Atualizar ou [R] Reconfigurar? (U/R): "
+    read choice < /dev/tty
+    [ "$choice" != "U" ] && [ "$choice" != "u" ] && MODE="reconfig"
+else
+    MODE="reconfig"
+fi
+
+if [ "$MODE" == "reconfig" ]; then
     echo -n "   Chave YT (PT): "; read yt_pt < /dev/tty
     echo -n "   Chave YT (EN): "; read yt_en < /dev/tty
     echo -n "   Chave YT (ES): "; read yt_es < /dev/tty
-    echo -e "\n🔔 Dados do Telegram:"
-    echo -n "   Token do Bot: "; read tg_token < /dev/tty
-    echo -n "   Chat ID:      "; read tg_chat_id < /dev/tty
-    echo -e "\n📂 Servidor de Sincronização:"
-    echo -n "   URL [https://daorakids.com.br/util/stream/]: "; read sync_url < /dev/tty
-    sync_url=${sync_url:-"https://daorakids.com.br/util/stream/"}
-    echo -n "   Usuário [stream]: "; read sync_user < /dev/tty
-    sync_user=${sync_user:-"stream"}
-    echo -n "   Senha [stream]:   "; read sync_pass < /dev/tty
-    sync_pass=${sync_pass:-"stream"}
-
+    echo -n "   Token Telegram: "; read tg_token < /dev/tty
+    echo -n "   Chat ID Telegram: "; read tg_chat_id < /dev/tty
+    
     cat <<EOF > $ENV_FILE
 YT_KEY_PT="$yt_pt"
 YT_KEY_EN="$yt_en"
 YT_KEY_ES="$yt_es"
 TELEGRAM_TOKEN="$tg_token"
 TELEGRAM_CHAT_ID="$tg_chat_id"
-SYNC_URL="$sync_url"
-SYNC_USER="$sync_user"
-SYNC_PASS="$sync_pass"
+SYNC_URL="https://daorakids.com.br/util/stream/"
 EOF
     chown stream:stream $ENV_FILE
 fi
 
-echo -e "\n🐍 Rodando instalador tecnico..."
-python3 $BASE_DIR/install.py --auto
+# 8. Download Final dos Scripts (Via GIT agora que o sistema esta limpo)
+echo "📦 Baixando scripts atualizados..."
+TEMP_GIT="/tmp/daorakids_git"
+rm -rf $TEMP_GIT
+git clone --depth 1 https://github.com/daorakids/streamer.git $TEMP_GIT
+cp -a $TEMP_GIT/home/stream/. /home/stream/
+chown -R stream:stream /home/stream
+chmod +x /home/stream/*.sh /home/stream/*.py
 
-# 9. Limpeza final
-rm -rf $TEMP_DIR
-echo "✅ Setup v2.8.18 concluido!"
+# 9. Ativando Serviços
+echo "⚙️  Ativando servicos..."
+cp /home/stream/*.service /etc/systemd/system/
+cp /home/stream/*.timer /etc/systemd/system/
+systemctl daemon-reload
+systemctl enable daorakids-cerebro.timer daorakids-sync.timer daorakids-live.service
+systemctl start daorakids-cerebro.timer
+
+# 10. Dashboard HDMI
+echo "📊 Configurando Dashboard..."
+BASHRC="/home/stream/.bashrc"
+sed -i '/DAORA KIDS/,/fi/d' $BASHRC
+cat <<EOF >> $BASHRC
+# --- DAORA KIDS DASHBOARD v2.8.19 ---
+alias ver='/home/stream/ver_live.sh'
+alias log='sudo journalctl -u daorakids-live.service -u daorakids-cerebro.service -u daorakids-sync.service -f'
+if [ "\$(tty)" = "/dev/tty1" ]; then
+    sleep 3
+    clear
+    /home/stream/ver_live.sh
+fi
+EOF
+
+echo -e "\n\033[1;32m✅ SUCESSO ABSOLUTO! v2.8.19\033[0m"
+echo "🔄 Reiniciando em 5 segundos para dominar o HDMI..."
+sync
+sleep 5
+reboot
