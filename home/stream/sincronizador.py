@@ -42,36 +42,25 @@ def get_remote_files(url, subfolder=""):
             log(f"⚠️ Servidor respondeu status {response.status_code}")
             return []
         
-        # Regex captura o conteúdo do href
         links_brutos = re.findall(r'href=["\']?([^"\'> ]+)', response.text, re.I)
         
         valid_links = []
         for link in links_brutos:
-            # 1. Ignora links de navegação óbvios
             if link.startswith('?') or '..' in link: continue
-            
-            # 2. Trata links absolutos (Ex: /util/stream/en/)
             if link.startswith('/'):
                 if link.startswith(BASE_PATH):
-                    # Remove o prefixo da base para tornar o link relativo ao projeto
                     link = link[len(BASE_PATH):].lstrip('/')
-                else:
-                    # Link absoluto fora da pasta do projeto, ignora
-                    continue
-            
+                else: continue
             if not link: continue
             valid_links.append(link)
 
         if not valid_links:
-            log(f"⚠️ Nenhum link util em {subfolder or 'root'}. (Total brutos: {len(links_brutos)})")
             return []
 
         for link in list(set(valid_links)):
             if link.endswith('/'):
-                # Recursão para pastas
                 files.extend(get_remote_files(url, subfolder + link))
             elif link.lower().endswith('.mp4'):
-                # Adiciona vídeo
                 files.append(subfolder + link)
                 
     except Exception as e:
@@ -79,7 +68,7 @@ def get_remote_files(url, subfolder=""):
     return list(set(files))
 
 def main():
-    log(f"Iniciando Sincronizador v2.8.40")
+    log(f"Iniciando Sincronizador v2.8.41")
     log(f"🌍 Servidor: {SYNC_URL} | Usuario: {SYNC_USER}")
     
     if not os.path.exists(VIDEO_ROOT):
@@ -90,7 +79,7 @@ def main():
     total_remote = len(remote_files)
     
     if total_remote == 0:
-        log("⚠️ Nenhum video encontrado. Verifique se o Directory Listing esta ativo.")
+        log("⚠️ Nenhum video encontrado.")
         sys.exit(0)
 
     log(f"✅ Encontrados {total_remote} videos. Iniciando...")
@@ -101,7 +90,8 @@ def main():
         filename = os.path.basename(rel_path)
         log(f"📥 [{i}/{total_remote}] {filename}")
         
-        cmd = ["wget", "--user", SYNC_USER, "--password", SYNC_PASS, "-c", "-N", "--no-verbose", "--modify-window=2", "-O", local_path, SYNC_URL + rel_path]
+        # REMOVIDO --modify-window para compatibilidade
+        cmd = ["wget", "--user", SYNC_USER, "--password", SYNC_PASS, "-c", "-N", "--no-verbose", "-O", local_path, SYNC_URL + rel_path]
         subprocess.run(cmd)
 
     log("✨ Sincronizacao finalizada!")

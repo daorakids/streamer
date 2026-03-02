@@ -1,14 +1,14 @@
-# Projeto Daora Kids v2.8.40 📺🍿
+# Projeto Daora Kids v2.8.41 📺🍿
 
-**Status:** v2.8.40 - Sincronização Absoluta e Modo Silencioso.
+**Status:** v2.8.41 - Compatibilidade de Wget e Sincronização Absoluta.
 
 ## 🚀 Arquitetura Atual (Sincronização Remota)
 
-1.  **Auto-login & Sistema (Mega Bootstrap v2.8.40):**
-    - **Sincronização Absoluta:** O sincronizador agora aceita e processa links que começam com `/` (caminhos absolutos do servidor).
-    - **Modo Silencioso:** O `setup.sh` agora assume **Update (U)** automaticamente, eliminando a interatividade desnecessária.
-    - **Argumento Reconfig:** Use `sudo bash setup.sh reconfig` para forçar o Wizard de perguntas.
-    - **Dominação HDMI Final:** Expurgo total de cloud-init e reconstrução de boot automática.
+1.  **Auto-login & Sistema (Mega Bootstrap v2.8.41):**
+    - **Compatibilidade Wget:** Removido o parâmetro `--modify-window` que causava erro em versões antigas do wget.
+    - **Sincronização Absoluta:** Suporte a links de servidor que começam com `/`.
+    - **Modo Silencioso:** Update automático sem interatividade no `setup.sh`.
+    - **Dominação HDMI Final:** Expurgo total de cloud-init e reconstrução de boot dinâmica.
 
 2.  **Monitor de Transmissão (`ver_live.sh`):**
     - **Comandos de Controle:** `daora-start` e `daora-stop` integrados ao dashboard.
