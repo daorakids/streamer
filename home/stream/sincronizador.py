@@ -46,8 +46,11 @@ def get_remote_files(url, subfolder=""):
         links = re.findall(r'href="([^"]+)"', response.text)
         
         if not links:
-            log(f"⚠️ Alerta: Nenhum link encontrado na pagina HTML de {subfolder or 'root'}")
-            log(f"📝 Conteudo inicial da resposta: {response.text[:200]}...")
+            log(f"⚠️ Alerta: Nenhum link 'href' encontrado em {full_url}")
+            log(f"📝 HTML RECEBIDO (primeiros 1000 caracteres):")
+            print("-" * 50)
+            print(response.text[:1000])
+            print("-" * 50)
             return []
 
         for link in links:
