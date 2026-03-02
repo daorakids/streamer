@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # ===============================================
-#  🚀 SUPER-BOOTSTRAP DAORA KIDS LIVE (v2.8.25)
+#  🚀 SUPER-BOOTSTRAP DAORA KIDS LIVE (v2.8.26)
 #  (Credentials & Sync Fix)
 # ===============================================
 
@@ -12,7 +12,7 @@ if [ "$(id -u)" -ne 0 ]; then
 fi
 
 clear
-echo -e "\033[1;32m🎨 INICIANDO DOMINAÇÃO HDMI v2.8.25\033[0m"
+echo -e "\033[1;32m🎨 INICIANDO DOMINAÇÃO HDMI v2.8.26\033[0m"
 
 # 2. Garantir Sudoers para o usuário stream
 echo "👤 Configurando privilegios do usuario stream..."
@@ -98,6 +98,11 @@ TEMP_GIT="/tmp/daorakids_git"
 rm -rf $TEMP_GIT
 git clone --depth 1 https://github.com/daorakids/streamer.git $TEMP_GIT
 cp -a $TEMP_GIT/home/stream/. /home/stream/
+
+# FAXINA: Remove pasta de videos errada que entupiu o SD card
+echo "🧹 Limpando arquivos residuais do MicroSD..."
+rm -rf /home/stream/videos
+
 chown -R stream:stream /home/stream
 chmod +x /home/stream/*.sh /home/stream/*.py
 
@@ -114,7 +119,7 @@ echo "📊 Configurando Dashboard..."
 BASHRC="/home/stream/.bashrc"
 sed -i '/DAORA KIDS/,/fi/d' $BASHRC
 cat <<EOF >> $BASHRC
-# --- DAORA KIDS DASHBOARD v2.8.25 ---
+# --- DAORA KIDS DASHBOARD v2.8.26 ---
 alias ver='/home/stream/ver_live.sh'
 alias log='sudo journalctl -u daorakids-live.service -u daorakids-cerebro.service -u daorakids-sync.service -f'
 if [ "\$(tty)" = "/dev/tty1" ]; then
@@ -124,7 +129,7 @@ if [ "\$(tty)" = "/dev/tty1" ]; then
 fi
 EOF
 
-echo -e "\n\033[1;32m✅ SUCESSO v2.8.25!\033[0m"
+echo -e "\n\033[1;32m✅ SUCESSO v2.8.26!\033[0m"
 echo "🔄 Reiniciando em 5 segundos..."
 sync
 sleep 5
