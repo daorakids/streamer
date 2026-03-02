@@ -199,7 +199,11 @@ def main():
             video_dir = find_video_dir(target_lang)
             if not video_dir:
                 video_dir = os.path.join(VIDEO_ROOT, target_lang)
-                log_debug(f"⚠️ Pasta {video_dir} nao existe fisicamente!")
+                log_debug(f"❌ ERRO CRITICO: Pasta de videos '{video_dir}' nao foi encontrada no pendrive!")
+                log_debug(f"   (Conteudo de {VIDEO_ROOT}: {os.listdir(VIDEO_ROOT) if os.path.exists(VIDEO_ROOT) else 'RAIZ NAO EXISTE'})")
+                # Remove config antiga para nao rodar video errado
+                if os.path.exists(CONFIG_FILE): os.remove(CONFIG_FILE)
+                return
 
             try:
                 with open(CONFIG_FILE, 'w') as f:
