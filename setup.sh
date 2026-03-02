@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # ===============================================
-#  🚀 SUPER-BOOTSTRAP DAORA KIDS LIVE (v2.8.35)
+#  🚀 SUPER-BOOTSTRAP DAORA KIDS LIVE (v2.8.36)
 #  (Deps & Boot Sync Fix)
 # ===============================================
 
@@ -12,7 +12,7 @@ if [ "$(id -u)" -ne 0 ]; then
 fi
 
 clear
-echo -e "\033[1;32m🎨 INICIANDO DOMINAÇÃO HDMI v2.8.35\033[0m"
+echo -e "\033[1;32m🎨 INICIANDO DOMINAÇÃO HDMI v2.8.36\033[0m"
 
 # 2. Garantir Sudoers para o usuário stream
 echo "👤 Configurando privilegios do usuario stream..."
@@ -76,11 +76,17 @@ else
 fi
 
 if [ "$MODE" == "reconfig" ]; then
+    # Tenta ler URL atual se existir
+    OLD_SYNC_URL=$(grep "SYNC_URL=" $ENV_FILE 2>/dev/null | cut -d'"' -f2)
+    DEFAULT_URL=${OLD_SYNC_URL:-"https://daorakids.com.br/util/stream/"}
+
     echo -n "   Chave YT (PT): "; read yt_pt < /dev/tty
     echo -n "   Chave YT (EN): "; read yt_en < /dev/tty
     echo -n "   Chave YT (ES): "; read yt_es < /dev/tty
     echo -n "   Token Telegram: "; read tg_token < /dev/tty
     echo -n "   Chat ID Telegram: "; read tg_chat_id < /dev/tty
+    echo -n "   URL Sync [$DEFAULT_URL]: "; read sync_url < /dev/tty
+    sync_url=${sync_url:-$DEFAULT_URL}
     echo -n "   Usuario Sync [stream]: "; read sync_user < /dev/tty
     sync_user=${sync_user:-"stream"}
     echo -n "   Senha Sync [stream]:   "; read sync_pass < /dev/tty
@@ -92,7 +98,7 @@ YT_KEY_EN="$yt_en"
 YT_KEY_ES="$yt_es"
 TELEGRAM_TOKEN="$tg_token"
 TELEGRAM_CHAT_ID="$tg_chat_id"
-SYNC_URL="https://daorakids.com.br/util/stream/"
+SYNC_URL="$sync_url"
 SYNC_USER="$sync_user"
 SYNC_PASS="$sync_pass"
 EOF
@@ -122,7 +128,7 @@ echo "📊 Configurando Dashboard e Atalhos..."
 BASHRC="/home/stream/.bashrc"
 sed -i '/DAORA KIDS/,/fi/d' $BASHRC
 cat <<EOF >> $BASHRC
-# --- DAORA KIDS DASHBOARD v2.8.35 ---
+# --- DAORA KIDS DASHBOARD v2.8.36 ---
 alias ver='/home/stream/ver_live.sh'
 alias log='sudo journalctl -u daorakids-live.service -u daorakids-cerebro.service -u daorakids-sync.service -f'
 alias monitor='/home/stream/ver_live.sh'
@@ -136,7 +142,7 @@ if [ "\$(tty)" = "/dev/tty1" ]; then
 fi
 EOF
 
-echo -e "\n\033[1;32m✅ SUCESSO v2.8.35!\033[0m"
+echo -e "\n\033[1;32m✅ SUCESSO v2.8.36!\033[0m"
 echo "🔄 Reiniciando em 5 segundos..."
 sync
 sleep 5
