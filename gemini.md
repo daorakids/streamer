@@ -1,14 +1,14 @@
-# Projeto Daora Kids v2.9 📺🍿
+# Projeto Daora Kids v2.9.1 📺🍿
 
-**Status:** v2.9 - Maturidade de Sincronismo e Dominação HDMI.
+**Status:** v2.9.1 - Correção de Sincronismo (Path Duplication Fix).
 
 ## 🚀 Arquitetura Atual (Sincronização Remota)
 
-1.  **Auto-login & Sistema (Mega Bootstrap v2.9):**
-    - **Sincronização Absoluta:** O sincronizador agora aceita links que começam com `/`, garantindo compatibilidade total com o servidor.
-    - **Modo Silencioso Inteligente:** O `setup.sh` agora assume **Update (U)** automaticamente, eliminando a interatividade desnecessária.
-    - **Dominação HDMI Total:** Expurgo garantido de cloud-init e reconstrução de boot dinâmica para um HDMI 100% limpo.
-    - **Auto-login Manual:** Override do Getty (TTY1) para garantir o login do usuário `stream`.
+1.  **Auto-login & Sistema (Mega Bootstrap v2.9.1):**
+    - **Sincronização Corrigida:** Resolvido bug que duplicava pastas (ex: `en/en/`) quando o servidor usava links absolutos.
+    - **Compatibilidade Wget:** Removido parâmetro incompatível `-N` quando usado com `-O`, garantindo o funcionamento em qualquer versão de wget.
+    - **Modo Silencioso Inteligente:** Update automático sem interatividade no `setup.sh`.
+    - **Dominação HDMI Total:** Expurgo garantido de cloud-init e boot 100% limpo.
 
 2.  **Monitor de Transmissão (`ver_live.sh`):**
     - **Comandos de Controle:** `daora-start` e `daora-stop` integrados ao dashboard.

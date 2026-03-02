@@ -47,28 +47,40 @@ def get_remote_files(url, subfolder=""):
         valid_links = []
         for link in links_brutos:
             if link.startswith('?') or '..' in link: continue
+            
+            # Trata links absolutos (Ex: /util/stream/en/)
             if link.startswith('/'):
                 if link.startswith(BASE_PATH):
+                    # Transforma em relativo ao SYNC_URL
                     link = link[len(BASE_PATH):].lstrip('/')
                 else: continue
+            
             if not link: continue
             valid_links.append(link)
 
-        if not valid_links:
-            return []
-
         for link in list(set(valid_links)):
             if link.endswith('/'):
-                files.extend(get_remote_files(url, subfolder + link))
+                # Na recursão, não passamos subfolder se o link já for o caminho completo
+                # Mas para manter a estrutura, limpamos o link e enviamos
+                clean_link = link.strip('/') + '/'
+                # Evita duplicar se o link já contiver o subfolder atual
+                if subfolder and clean_link.startswith(subfolder):
+                    files.extend(get_remote_files(url, clean_link))
+                else:
+                    files.extend(get_remote_files(url, subfolder + clean_link))
             elif link.lower().endswith('.mp4'):
-                files.append(subfolder + link)
+                # Garante que o arquivo final seja relativo à raiz do sync
+                if subfolder and link.startswith(subfolder):
+                    files.append(link)
+                else:
+                    files.append(subfolder + link)
                 
     except Exception as e:
         log(f"⚠️ Erro de conexao: {e}")
     return list(set(files))
 
 def main():
-    log(f"Iniciando Sincronizador v2.9")
+    log(f"Iniciando Sincronizador v2.9.1")
     log(f"🌍 Servidor: {SYNC_URL} | Usuario: {SYNC_USER}")
     
     if not os.path.exists(VIDEO_ROOT):
@@ -85,13 +97,16 @@ def main():
     log(f"✅ Encontrados {total_remote} videos. Iniciando...")
 
     for i, rel_path in enumerate(sorted(remote_files), 1):
-        local_path = os.path.join(VIDEO_ROOT, rel_path)
+        # Limpeza final do path para evitar // ou en/en/
+        clean_rel_path = rel_path.replace('//', '/').lstrip('/')
+        local_path = os.path.join(VIDEO_ROOT, clean_rel_path)
         os.makedirs(os.path.dirname(local_path), exist_ok=True)
-        filename = os.path.basename(rel_path)
+        
+        filename = os.path.basename(clean_rel_path)
         log(f"📥 [{i}/{total_remote}] {filename}")
         
-        # REMOVIDO --modify-window para compatibilidade
-        cmd = ["wget", "--user", SYNC_USER, "--password", SYNC_PASS, "-c", "-N", "--no-verbose", "-O", local_path, SYNC_URL + rel_path]
+        # Wget sem -N para evitar conflito com -O, mas com -c para resume
+        cmd = ["wget", "--user", SYNC_USER, "--password", SYNC_PASS, "-c", "--no-verbose", "-O", local_path, SYNC_URL + clean_rel_path]
         subprocess.run(cmd)
 
     log("✨ Sincronizacao finalizada!")
