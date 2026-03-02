@@ -9,6 +9,6 @@ Type=oneshot
 User=stream
 Nice=19
 IOSchedulingClass=idle
-# -P /mnt/videos garante o pendrive.
-# --mirror garante que arquivos deletados no servidor tambem sejam deletados localmente.
+# -P /mnt/videos garante o pendrive. 
+# --mirror garante que o que esta no site e o que esta no Pi.
 ExecStart=/usr/bin/wget --user=stream --password=stream -c -r -np -nH --cut-dirs=2 --modify-window=2 -A mp4 --tries=3 --timeout=30 --show-progress -P /mnt/videos https://daorakids.com.br/util/stream/
