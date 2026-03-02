@@ -1,11 +1,11 @@
 [Unit]
-Description=Timer para Sincronizacao de Videos Daora Kids
+Description=Timer para Sincronizacao de Videos Daora Kids (A cada 10 min)
 
 [Timer]
-# Roda 1 minuto apos o boot para garantir rede e libs
+# Roda 1 minuto apos o boot
 OnBootSec=1min
-# Roda no minuto zero de cada hora
-OnCalendar=hourly
+# Roda a cada 10 minutos (Ex: 14:00, 14:10, 14:20...)
+OnCalendar=*:0/10
 # Garante que rode mesmo se o Pi ligar depois da hora marcada
 Persistent=true
 Unit=daorakids-sync.service

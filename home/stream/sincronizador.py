@@ -79,7 +79,7 @@ def get_remote_files(url, subfolder=""):
     return list(set(files))
 
 def main():
-    log(f"Iniciando Sincronizador v2.9.2")
+    log(f"Iniciando Sincronizador v2.9.3")
     log(f"🌍 Servidor: {SYNC_URL}")
     
     if not os.path.exists(VIDEO_ROOT):

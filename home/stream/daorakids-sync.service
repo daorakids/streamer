@@ -1,5 +1,5 @@
 [Unit]
-Description=Daora Kids Sync Service (Python v2.9.2)
+Description=Daora Kids Sync Service (Python v2.9.3)
 After=network-online.target mnt-videos.mount
 Wants=network-online.target
 Requires=mnt-videos.mount

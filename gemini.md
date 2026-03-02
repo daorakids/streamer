@@ -1,13 +1,13 @@
-# Projeto Daora Kids v2.9.2 📺🍿
+# Projeto Daora Kids v2.9.3 📺🍿
 
-**Status:** v2.9.2 - Correção de Pastas Aninhadas e Zero-Byte Fix.
+**Status:** v2.9.3 - Sincronismo Acelerado (10 min).
 
 ## 🚀 Arquitetura Atual (Sincronização Remota)
 
-1.  **Auto-login & Sistema (Mega Bootstrap v2.9.2):**
-    - **Sincronizador v2.9.2:** Resolvido bug que criava pastas aninhadas (ex: `en/en/`) e arquivos de zero bytes.
-    - **Wget Robusto:** Uso de `-O` absoluto garantindo que o download vá para o arquivo correto no pendrive.
-    - **Modo Silencioso:** Update automático via `setup.sh` preservando o `.env`.
+1.  **Auto-login & Sistema (Mega Bootstrap v2.9.3):**
+    - **Sincronismo Acelerado:** Timer de sincronização agora roda a cada **10 minutos** (OnCalendar=*:0/10), garantindo atualizações rápidas.
+    - **Sincronizador Pro:** Resolvido bug de caminhos aninhados e arquivos zero bytes.
+    - **Modo Silencioso:** Update automático via `setup.sh` simplificado.
     - **Dominação HDMI:** Boot limpo e dashboard automático garantidos.
 
 2.  **Monitor de Transmissão (`ver_live.sh`):**
