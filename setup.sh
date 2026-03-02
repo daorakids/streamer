@@ -71,7 +71,7 @@ chmod +x $BASE_DIR/*.sh
 chmod +x $BASE_DIR/*.py
 
 # 8. Wizard de Configuração em BASH (Pensando fora da caixa - Máxima estabilidade)
-echo -e "\n\033[1;32m🎨 CONFIGURAÇÃO DAORA KIDS v2.8.2\033[0m"
+echo -e "\n\033[1;32m🎨 CONFIGURAÇÃO DAORA KIDS v2.8.5\033[0m"
 
 ENV_FILE="$BASE_DIR/.env"
 
