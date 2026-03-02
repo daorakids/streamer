@@ -8,12 +8,14 @@ import time
 from urllib.parse import urlparse
 from dotenv import load_dotenv
 
-def run_cmd(cmd, sudo=False):
+def run_cmd(cmd, sudo=False, capture=False):
     if sudo: cmd = f"sudo {cmd}"
-    # Não capturamos output aqui para evitar travamentos em pedidos de senha
+    if capture:
+        return subprocess.run(cmd, shell=True, capture_output=True, text=True)
     return subprocess.run(cmd, shell=True, text=True)
 
 def get_input(prompt, required=True):
+# ... (rest of function unchanged)
     while True:
         try:
             val = input(prompt).strip()
@@ -78,8 +80,9 @@ def setup_wizard():
 
     # SEGURO: Só mexemos no fstab se o ponto de montagem /mnt/videos NÃO existir
     if "/mnt/videos" not in fstab_content:
-        # Busca UUID do sda1 (pendrive)
-        uuid_raw = run_cmd("blkid -s UUID -o value /dev/sda1").stdout.strip()
+        # Busca UUID do sda1 (pendrive) com sudo e captura de texto
+        res = run_cmd("blkid -s UUID -o value /dev/sda1", sudo=True, capture=True)
+        uuid_raw = res.stdout.strip() if res.stdout else ""
         
         line = ""
         if uuid_raw:
