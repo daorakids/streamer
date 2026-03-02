@@ -75,18 +75,27 @@ def update_schedule_from_web():
 
 def get_current_slot():
     try:
-        if not os.path.exists(SCHEDULE_PATH): return None
+        if not os.path.exists(SCHEDULE_PATH): 
+            print("⚠️ Arquivo schedule.json nao encontrado!")
+            return None
         with open(SCHEDULE_PATH, 'r') as f:
             data = json.load(f)
-    except: return None
+    except Exception as e: 
+        print(f"❌ Erro ao ler schedule.json: {e}")
+        return None
 
-    if data.get("emergency_stop"): return {"lang": "STOP"}
+    if data.get("emergency_stop"): 
+        print("🛑 Parada de Emergencia ativada no JSON.")
+        return {"lang": "STOP"}
 
     agora = datetime.datetime.now()
     hoje_iso = agora.strftime("%Y-%m-%d")
-    hoje_dia = agora.strftime("%a").lower()
+    # Force English weekday names to match schedule.json keys (mon, tue, wed...)
+    days_map = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
+    hoje_dia = days_map[agora.weekday()]
     hora_atual = agora.strftime("%H:%M")
 
+    print(f"🔍 Checando slot para {hoje_dia} as {hora_atual}...")
     slot = None
     special = data.get("special_dates", {}).get(hoje_iso)
     if special:
