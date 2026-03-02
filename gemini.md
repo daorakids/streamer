@@ -1,14 +1,14 @@
-# Projeto Daora Kids v2.8.38 📺🍿
+# Projeto Daora Kids v2.8.39 📺🍿
 
-**Status:** v2.8.38 - Sincronizador Ultra-Sensível e Início Forçado.
+**Status:** v2.8.39 - Modo Silencioso Inteligente e Argumentos de Setup.
 
 ## 🚀 Arquitetura Atual (Sincronização Remota)
 
-1.  **Auto-login & Sistema (Mega Bootstrap v2.8.38):**
-    - **Sincronizador Ultra-Sensível:** Regex aprimorado para capturar links em qualquer formato de servidor.
-    - **Início Imediato:** Setup agora força o start dos serviços e timers antes do reboot para diagnósticos rápidos.
-    - **Dominação HDMI Final:** Expurgo total de cloud-init e reconstrução de boot garantidos.
-    - **Auto-login Manual:** Implementado via override direto para evitar falhas de utilitários externos.
+1.  **Auto-login & Sistema (Mega Bootstrap v2.8.39):**
+    - **Modo Silencioso:** O `setup.sh` agora assume **Update (U)** automaticamente se o `.env` existir, eliminando a interatividade desnecessária.
+    - **Argumento Reconfig:** Use `sudo bash setup.sh reconfig` para forçar o Wizard de perguntas se precisar mudar as chaves.
+    - **Sincronizador v2.8.39:** Regex ultra-sensível e logs de "X de Y" integrados.
+    - **Dominação HDMI Final:** Expurgo total de cloud-init e reconstrução de boot automática.
 
 2.  **Monitor de Transmissão (`ver_live.sh`):**
     - **Comandos de Controle:** `daora-start` e `daora-stop` integrados ao dashboard.

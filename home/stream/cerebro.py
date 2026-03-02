@@ -105,7 +105,7 @@ def get_current_slot():
     return slot
 
 def main():
-    log_debug("--- INICIANDO CEREBRO v2.8.38 ---")
+    log_debug("--- INICIANDO CEREBRO v2.8.39 ---")
     update_schedule_from_web()
     
     # VALIDACAO DE PRONTIDAO (Sugestao do usuario)
