@@ -1,14 +1,14 @@
-# Projeto Daora Kids v2.8.15 📺🍿
+# Projeto Daora Kids v2.8.16 📺🍿
 
-**Status:** v2.8.15 - Dominio Total do HDMI e Auto-login Forçado.
+**Status:** v2.8.16 - Opção Nuclear HDMI: Purge cloud-init e reconstrução de cmdline.
 
 ## 🚀 Arquitetura Atual (Sincronização Remota)
 
-1.  **Auto-login & Sistema (Wizard v2.8.15):**
-    - **Auto-login Forçado:** Override manual do Getty (TTY1) para garantir o login automático do usuário `stream`.
-    - **Cloud-init Desativado:** Remoção total das mensagens técnicas de boot que sujavam o HDMI.
-    - **HDMI Dashboard:** Atraso de segurança no `.bashrc` para garantir uma tela limpa no Dashboard.
-    - **Cérebro v2.8.15:** Super Logs de diagnóstico e independência de locale.
+1.  **Auto-login & Sistema (Wizard v2.8.16):**
+    - **Opção Nuclear HDMI:** Purgagem completa do pacote `cloud-init` para limpar o console.
+    - **Rebuild cmdline.txt:** Reconstrução cirúrgica do arquivo de boot para remover o bug `enable_hdmi=0` e forçar `quiet`.
+    - **Auto-login Manual:** Override do Getty (TTY1) criado com comando único para evitar falhas de diretório.
+    - **Cérebro v2.8.16:** Diagnóstico avançado e detecção de slot inteligente.
 
 2.  **Monitor de Transmissão (`ver_live.sh`):**
     - **Logs Unificados:** Agora mostra Live, Cérebro e Sincronizador em uma única tela.
