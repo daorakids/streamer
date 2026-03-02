@@ -29,9 +29,20 @@ def setup_wizard():
     run_cmd("pkill -f ffmpeg", sudo=True)
 
     if not is_update:
-        # 1. YouTube
-        yt_pt = input("Chave YouTube (PT): ").strip()
-        yt_en = input("Chave YouTube (EN): ").strip()
+            # 1. YouTube
+            print("🌐 Configurando DNS de backup (8.8.8.8, 1.1.1.1)...")
+            dns_conf = "\nstatic domain_name_servers=8.8.8.8 1.1.1.1\n"
+            with open("/etc/dhcpcd.conf", "r") as f:
+                if "static domain_name_servers" not in f.read():
+                    with open("/tmp/dhcpcd.conf", "w") as tmp_f:
+                        tmp_f.write(f.read() + dns_conf)
+                    run_cmd("cp /tmp/dhcpcd.conf /etc/dhcpcd.conf", sudo=True)
+            
+            # Força DNS imediato para o restante da instalação
+            run_cmd("echo 'nameserver 8.8.8.8' | sudo tee /etc/resolv.conf", sudo=False)
+            run_cmd("echo 'nameserver 1.1.1.1' | sudo tee -a /etc/resolv.conf", sudo=False)
+        
+            yt_pt = input("Chave YouTube (PT): ").strip()        yt_en = input("Chave YouTube (EN): ").strip()
         yt_es = input("Chave YouTube (ES): ").strip()
 
         # 2. Telegram
