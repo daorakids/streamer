@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # ===============================================
-#  🚀 BOOTSTRAP DAORA KIDS LIVE 24H (v2.8.6)
+#  🚀 BOOTSTRAP DAORA KIDS LIVE 24H (v2.8.7)
 # ===============================================
 
 # 1. Verificar Privilégios e Estado do Disco
@@ -10,13 +10,17 @@ if [ "$(id -u)" -ne 0 ]; then
     exit 1
 fi
 
-echo "🛡️ Verificando integridade do disco..."
+echo "🛡️ Verificando integridade do disco e preparando montagem..."
 mount -o remount,rw / 2>/dev/null
-if [ $? -ne 0 ]; then
-    echo "⚠️ AVISO: Não foi possível remontar como RW. O disco pode estar corrompido ou protegido."
+mkdir -p /mnt/videos
+chmod 777 /mnt/videos
+if [ ! -d "/mnt/videos" ]; then
+    echo "🚨 ERRO FATAL: Nao foi possivel criar /mnt/videos. O disco pode estar em modo Read-Only ou corrompido."
+    exit 1
 fi
+echo "   ✅ Pasta /mnt/videos pronta."
 
-echo "🔄 Iniciando Setup do Sistema (isso pode demorar alguns minutos)..."
+echo "🔄 Iniciando Setup do Sistema..."
 
 # 2. Instalar dependências essenciais apenas se necessário
 echo "📦 Verificando dependências (git, ffmpeg, python3)..."
@@ -71,7 +75,7 @@ chmod +x $BASE_DIR/*.sh
 chmod +x $BASE_DIR/*.py
 
 # 8. Wizard de Configuração em BASH (Pensando fora da caixa - Máxima estabilidade)
-echo -e "\n\033[1;32m🎨 CONFIGURAÇÃO DAORA KIDS v2.8.6\033[0m"
+echo -e "\n\033[1;32m🎨 CONFIGURAÇÃO DAORA KIDS v2.8.7\033[0m"
 
 ENV_FILE="$BASE_DIR/.env"
 
