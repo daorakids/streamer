@@ -4,6 +4,7 @@ import sys
 import subprocess
 import re
 import time
+from urllib.parse import urlparse
 
 # --- LOG DE DIAGNÓSTICO ---
 def log(msg):
@@ -27,6 +28,9 @@ SYNC_URL = os.getenv("SYNC_URL", "https://daorakids.com.br/util/stream/").rstrip
 SYNC_USER = os.getenv("SYNC_USER", "stream")
 SYNC_PASS = os.getenv("SYNC_PASS", "stream")
 
+# Extrai o path da URL para validar caminhos absolutos
+BASE_PATH = urlparse(SYNC_URL).path
+
 def get_remote_files(url, subfolder=""):
     files = []
     full_url = url + subfolder
@@ -38,26 +42,44 @@ def get_remote_files(url, subfolder=""):
             log(f"⚠️ Servidor respondeu status {response.status_code}")
             return []
         
-        # Regex Ultra-Sensivel (ignora case, aceita aspas simples/duplas ou sem aspas)
-        links = re.findall(r'href=["\']?([^"\'> ]+)', response.text, re.I)
+        # Regex captura o conteúdo do href
+        links_brutos = re.findall(r'href=["\']?([^"\'> ]+)', response.text, re.I)
         
-        if not links:
-            log(f"📝 HTML RECEBIDO (Snippet): {response.text[:500]}")
+        valid_links = []
+        for link in links_brutos:
+            # 1. Ignora links de navegação óbvios
+            if link.startswith('?') or '..' in link: continue
+            
+            # 2. Trata links absolutos (Ex: /util/stream/en/)
+            if link.startswith('/'):
+                if link.startswith(BASE_PATH):
+                    # Remove o prefixo da base para tornar o link relativo ao projeto
+                    link = link[len(BASE_PATH):].lstrip('/')
+                else:
+                    # Link absoluto fora da pasta do projeto, ignora
+                    continue
+            
+            if not link: continue
+            valid_links.append(link)
+
+        if not valid_links:
+            log(f"⚠️ Nenhum link util em {subfolder or 'root'}. (Total brutos: {len(links_brutos)})")
             return []
 
-        for link in links:
-            # Ignora links de navegacao do servidor
-            if link.startswith('?') or link.startswith('/') or '..' in link: continue
+        for link in list(set(valid_links)):
             if link.endswith('/'):
+                # Recursão para pastas
                 files.extend(get_remote_files(url, subfolder + link))
             elif link.lower().endswith('.mp4'):
+                # Adiciona vídeo
                 files.append(subfolder + link)
+                
     except Exception as e:
         log(f"⚠️ Erro de conexao: {e}")
-    return list(set(files)) # Remove duplicatas
+    return list(set(files))
 
 def main():
-    log(f"Iniciando Sincronizador v2.8.39")
+    log(f"Iniciando Sincronizador v2.8.40")
     log(f"🌍 Servidor: {SYNC_URL} | Usuario: {SYNC_USER}")
     
     if not os.path.exists(VIDEO_ROOT):
@@ -68,15 +90,14 @@ def main():
     total_remote = len(remote_files)
     
     if total_remote == 0:
-        log("⚠️ Nenhum video encontrado. Verifique a listagem de diretorios no servidor.")
+        log("⚠️ Nenhum video encontrado. Verifique se o Directory Listing esta ativo.")
         sys.exit(0)
 
-    log(f"✅ Encontrados {total_remote} videos. Sincronizando...")
+    log(f"✅ Encontrados {total_remote} videos. Iniciando...")
 
     for i, rel_path in enumerate(sorted(remote_files), 1):
         local_path = os.path.join(VIDEO_ROOT, rel_path)
         os.makedirs(os.path.dirname(local_path), exist_ok=True)
-        
         filename = os.path.basename(rel_path)
         log(f"📥 [{i}/{total_remote}] {filename}")
         
