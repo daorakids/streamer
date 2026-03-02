@@ -1,14 +1,14 @@
-# Projeto Daora Kids v2.8.14 📺🍿
+# Projeto Daora Kids v2.8.15 📺🍿
 
-**Status:** v2.8.14 - HDMI Dominado, Boot Silencioso e Auto-login Oficial.
+**Status:** v2.8.15 - Dominio Total do HDMI e Auto-login Forçado.
 
 ## 🚀 Arquitetura Atual (Sincronização Remota)
 
-1.  **Auto-login & Sistema (Wizard v2.8.14):**
-    - **Auto-login Oficial:** Implementado via `raspi-config` para máxima compatibilidade com Debian 13.
-    - **HDMI Dashboard:** Monitoramento automático no terminal físico (HDMI) com tela limpa.
-    - **Boot Silencioso:** Kernel e mensagens de sistema ocultadas para uma experiência de "Kiosk".
-    - **Cérebro v2.8.14:** Independente de locale e com logs de diagnóstico unificados.
+1.  **Auto-login & Sistema (Wizard v2.8.15):**
+    - **Auto-login Forçado:** Override manual do Getty (TTY1) para garantir o login automático do usuário `stream`.
+    - **Cloud-init Desativado:** Remoção total das mensagens técnicas de boot que sujavam o HDMI.
+    - **HDMI Dashboard:** Atraso de segurança no `.bashrc` para garantir uma tela limpa no Dashboard.
+    - **Cérebro v2.8.15:** Super Logs de diagnóstico e independência de locale.
 
 2.  **Monitor de Transmissão (`ver_live.sh`):**
     - **Logs Unificados:** Agora mostra Live, Cérebro e Sincronizador em uma única tela.
