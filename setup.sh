@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # ===============================================
-#  🚀 SUPER-BOOTSTRAP DAORA KIDS LIVE (v3.2.3)
+#  🚀 SUPER-BOOTSTRAP DAORA KIDS LIVE (v3.2.4)
 # ===============================================
 
 # 1. Privilégios e Argumentos
@@ -14,7 +14,7 @@ fi
 FORCE_MODE=$(echo "$1" | tr '[:upper:]' '[:lower:]')
 
 clear
-echo -e "\033[1;32m🎨 INICIANDO DOMINAÇÃO v3.2.3 (SCHEDULER)\033[0m"
+echo -e "\033[1;32m🎨 INICIANDO DOMINAÇÃO v3.2.4 (SCHEDULER)\033[0m"
 
 # 2. Garantir Sudoers para o usuário stream
 if ! id "stream" &>/dev/null; then
@@ -104,7 +104,7 @@ else
 fi
 
 # 9. Download Final dos Scripts
-echo "📦 Baixando scripts v3.2.3..."
+echo "📦 Baixando scripts v3.2.4..."
 TEMP_GIT="/tmp/daorakids_git"
 rm -rf $TEMP_GIT
 git clone --depth 1 https://github.com/daorakids/streamer.git $TEMP_GIT
@@ -125,11 +125,11 @@ systemctl start daorakids-scheduler.timer daorakids-sync.timer
 BASHRC="/home/stream/.bashrc"
 sed -i '/DAORA KIDS/,/fi/d' $BASHRC
 cat <<EOF >> $BASHRC
-# --- DAORA KIDS DASHBOARD v3.2.3.1 ---
+# --- DAORA KIDS DASHBOARD v3.2.4 ---
 alias ver='/home/stream/dashboard.sh'
 alias monitor='/home/stream/dashboard.sh'
 alias log='sudo journalctl -u daorakids-live.service -u daorakids-scheduler.service -u daorakids-sync.service -f'
-alias daora-stop='sudo systemctl stop daorakids-live.service daorakids-sync.timer daorakids-scheduler.timer && sudo pkill -f ffmpeg && echo "🛑 PARADO."'
+alias daora-stop='sudo systemctl stop daorakids-live.service daorakids-sync.timer daorakids-sync.service daorakids-scheduler.timer && sudo pkill -f "ffmpeg|wget|sincronizador.py" && echo "🛑 TUDO PARADO (Live, Sync e Scheduler)."'
 alias daora-start='sudo systemctl start daorakids-scheduler.timer daorakids-sync.timer daorakids-live.service && echo "🚀 INICIADO."'
 
 # Força suporte a cores no HDMI (tty1)
@@ -141,7 +141,7 @@ if [ "\$(tty)" = "/dev/tty1" ]; then
 fi
 EOF
 
-echo -e "\n\033[1;32m✅ SUCESSO v3.2.3.1!\033[0m"
+echo -e "\n\033[1;32m✅ SUCESSO v3.2.4.1!\033[0m"
 echo "🔄 Reiniciando..."
 sync
 sleep 5
