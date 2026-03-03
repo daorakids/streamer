@@ -1,4 +1,4 @@
-# Daora Kids v3.1.1 📺🍿
+# Daora Kids v3.2 📺🍿
 
 Sistema de Streaming Kids 24/7 (Raspberry Pi 3 ou superior) - Blindado e Totalmente Remoto.
 
@@ -6,33 +6,30 @@ Sistema de Streaming Kids 24/7 (Raspberry Pi 3 ou superior) - Blindado e Totalme
 
 ## 🚀 Como Instalar ou Atualizar (Zero-Touch Setup)
 
-Para instalar ou atualizar para a versão mais recente (**v3.1.1**), rode o comando abaixo no terminal do Raspberry:
+Para instalar ou atualizar para a versão mais recente (**v3.2**), rode o comando abaixo no terminal do Raspberry:
 
 ```bash
 sudo bash -c "$(curl -sSL https://raw.githubusercontent.com/daorakids/streamer/main/setup.sh?v=$RANDOM)"
 ```
 
-### O que há de novo na v3.1:
-*   **Pastas Case-Insensitive:** O sistema agora encontra as pastas de vídeo independente de maiúsculas ou minúsculas (ex: `EN`, `En`, `en`).
-*   **Sincronização Otimizada:** O `wget` foi configurado para evitar re-downloads desnecessários e reduzir o ruído nos logs.
-*   **Dominação HDMI:** Expurgo total do `cloud-init` e reconstrução cirúrgica do boot para uma experiência limpa.
-*   **Auto-login Forçado:** Login automático no usuário `stream` garantido por override manual do systemd.
+### O que há de novo na v3.2:
+*   **Padronização Técnica:** O componente "Cérebro" agora se chama oficialmente **Scheduler**, com nomes de arquivos e serviços atualizados.
+*   **Pastas Case-Insensitive:** O sistema agora encontra as pastas de vídeo independente de maiúsculas ou minúsculas.
+*   **Dominação HDMI:** Boot 100% silencioso e dashboard automático em tela cheia.
 
 ## 📺 Monitoramento em Tempo Real (HDMI Dashboard)
 
 O sistema conta com um painel de monitoramento amigável que inicia automaticamente no terminal físico (HDMI).
 
 - **Comando Rápido:** Digite `ver` ou `monitor` a qualquer momento para ver o status da transmissão.
-- **Auto-Start HDMI:** Ao ligar o Raspberry em uma TV, o dashboard aparecerá sozinho após o boot silencioso.
-- **Logs Consolidados:** Use o comando `log` para seguir Live, Cérebro e Sincronizador simultaneamente.
+- **Logs Consolidados:** Use o comando `log` para seguir Live, Scheduler e Sincronizador simultaneamente.
 
-## 🧠 Arquitetura (Cérebro + Bash)
+## 🧠 Arquitetura (Scheduler + Bash)
 
-O sistema opera com um "Cérebro" em Python (`cerebro.py`) rodando via **Systemd Timer** a cada 5 minutos, que coordena um "Braço" em Bash (`iniciar_live.sh`) responsável pelo FFmpeg.
+O sistema opera com um **Scheduler** em Python (`scheduler.py`) rodando via **Systemd Timer** a cada 5 minutos, que coordena um "Braço" em Bash (`iniciar_live.sh`) responsável pelo FFmpeg.
 
 ### 🔄 Sincronização Automática
-- **Agenda (`schedule.json`):** O `cerebro.py` baixa a agenda do servidor a cada 5 minutos. Se houver qualquer mudança no slot, a live é atualizada instantaneamente.
-- **Resiliência:** O Cérebro detecta o dia da semana em Inglês, ignorando o idioma local do sistema para evitar conflitos de agenda.
+- **Agenda (`schedule.json`):** O Scheduler baixa a agenda do servidor a cada 5 minutos. Se houver qualquer mudança no slot, a live é atualizada instantaneamente.
 - **Vídeos (`.mp4`):** O serviço `daorakids-sync.service` sincroniza os vídeos via `wget` de forma inteligente.
 
 ## 🩺 Manutenção e Saúde

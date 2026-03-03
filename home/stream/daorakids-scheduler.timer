@@ -1,10 +1,10 @@
 [Unit]
-Description=Daora Kids Cerebro Timer
+Description=Daora Kids Scheduler Timer
 
 [Timer]
 OnBootSec=1min
 OnUnitActiveSec=5min
-Unit=daorakids-cerebro.service
+Unit=daorakids-scheduler.service
 
 [Install]
 WantedBy=timers.target

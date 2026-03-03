@@ -1,9 +1,9 @@
 [Unit]
-Description=Daora Kids Cerebro Service
+Description=Daora Kids Scheduler Service
 After=network-online.target
 
 [Service]
 Type=oneshot
 User=stream
 WorkingDirectory=/home/stream
-ExecStart=/usr/bin/python3 /home/stream/cerebro.py
+ExecStart=/usr/bin/python3 /home/stream/scheduler.py

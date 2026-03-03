@@ -16,7 +16,7 @@ def run_cmd(cmd, sudo=False, capture=False):
 
 def setup_wizard():
     print("\n" + "="*40)
-    print(" 🎨 INSTALADOR/UPDATER DAORA KIDS v3.1.1 ")
+    print(" 🎨 INSTALADOR/UPDATER DAORA KIDS v3.2 ")
     print("="*40 + "\n")
 
     BASE_DIR = "/home/stream"
@@ -33,7 +33,7 @@ def setup_wizard():
 
     # Parar serviços
     print("⏹ Parando servicos...")
-    run_cmd("systemctl stop daorakids-live.service daorakids-sync.service daorakids-sync.timer daorakids-cerebro.timer", sudo=True)
+    run_cmd("systemctl stop daorakids-live.service daorakids-sync.service daorakids-sync.timer daorakids-scheduler.timer", sudo=True)
     run_cmd("pkill -f ffmpeg", sudo=True)
 
     # 1. DNS
@@ -84,7 +84,7 @@ def setup_wizard():
         with open("/tmp/cmdline.txt", "w") as f: f.write(new_line + "\n")
         run_cmd(f"cp /tmp/cmdline.txt {cmdline_path}", sudo=True)
 
-    # 6. Servicos Systemd (Otimizados v3.1.1)
+    # 6. Servicos Systemd (Otimizados v3.2)
     print("⚙️  Configurando servicos do systemd...")
     
     sync_service = f"""[Unit]
@@ -127,9 +127,9 @@ WantedBy=multi-user.target
     # 7. Dashboard .bashrc
     bashrc_path = "/home/stream/.bashrc"
     bashrc_addon = """
-# --- DAORA KIDS DASHBOARD v3.1.1 ---
+# --- DAORA KIDS DASHBOARD v3.2 ---
 alias ver='/home/stream/dashboard.sh'
-alias log='sudo journalctl -u daorakids-live.service -u daorakids-cerebro.service -u daorakids-sync.service -f'
+alias log='sudo journalctl -u daorakids-live.service -u daorakids-scheduler.service -u daorakids-sync.service -f'
 alias monitor='/home/stream/dashboard.sh'
 if [ "$(tty)" = "/dev/tty1" ]; then
     sleep 3
@@ -142,15 +142,15 @@ fi
 
     print("⚙️  Ativando servicos...")
     run_cmd("systemctl daemon-reload", sudo=True)
-    for srv in ["daorakids-cerebro.timer", "daorakids-sync.timer", "daorakids-live.service"]:
+    for srv in ["daorakids-scheduler.timer", "daorakids-sync.timer", "daorakids-live.service"]:
         run_cmd(f"systemctl enable {srv}", sudo=True)
         run_cmd(f"systemctl start {srv}", sudo=True)
 
-    # Roda o Cérebro uma vez
-    print("🧠 Inicializando Cerebro...")
-    run_cmd(f"sudo -u stream /usr/bin/python3 {BASE_DIR}/cerebro.py")
+    # Roda o Scheduler uma vez
+    print("📅 Inicializando Scheduler...")
+    run_cmd(f"sudo -u stream /usr/bin/python3 {BASE_DIR}/scheduler.py")
     
-    print("\n✅ Setup v3.1.1 concluído! Reiniciando em 5s...")
+    print("\n✅ Setup v3.2 concluído! Reiniciando em 5s...")
     run_cmd("sync", sudo=True)
     time.sleep(5)
     run_cmd("reboot", sudo=True)

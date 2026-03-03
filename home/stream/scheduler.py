@@ -24,7 +24,7 @@ C_CYAN = "\033[1;36m"
 # --- CONFIGURAÇÃO DE LOGS ---
 def log_debug(msg):
     timestamp = datetime.datetime.now().strftime("%H:%M:%S")
-    prefix = f"{C_MAGENTA}🧠 [CEREBRO]{C_RESET}"
+    prefix = f"{C_MAGENTA}📅 [SCHEDULER]{C_RESET}"
     if "❌" in msg or "💥" in msg:
         msg = f"{C_RED}{msg}{C_RESET}"
     elif "⚠️" in msg or "⏳" in msg:
@@ -98,12 +98,10 @@ def get_current_slot():
     hora_atual = agora.strftime("%H:%M")
 
     slot = None
-    # 1. Datas especiais
     special = data.get("special_dates", {}).get(agora.strftime("%Y-%m-%d"))
     if special:
         for s in special:
             if s["start"] <= hora_atual <= s["end"]: slot = s; break
-    # 2. Agenda semanal
     if not slot:
         day_slots = data.get("schedule", {}).get(hoje_dia)
         if day_slots:
@@ -121,7 +119,7 @@ def get_current_slot():
     return slot
 
 def main():
-    log_debug(f"{C_BOLD}--- INICIANDO CEREBRO v3.1.1 ---{C_RESET}")
+    log_debug(f"{C_BOLD}--- INICIANDO SCHEDULER v3.2 ---{C_RESET}")
     update_schedule_from_web()
     
     # CHECK DE HARDWARE
@@ -180,7 +178,7 @@ def main():
         log_debug(f"😴 Tudo em ordem. Transmitindo {C_BOLD}{slot.get('lang').upper()}{C_RESET}...")
 
     # Lembrete de comandos
-    print(f"\n{C_CYAN}💡 Comandos:{C_RESET} {C_BOLD}'log'{C_RESET} (monitor), {C_BOLD}'daora-stop'{C_RESET}, {C_BOLD}'daora-start'{C_RESET}\n")
+    print(f"\n{C_CYAN}💡 Comandos:{C_RESET} {C_BOLD}'log'{C_RESET}, {C_BOLD}'daora-stop'{C_RESET}, {C_BOLD}'daora-start'{C_RESET}\n")
 
 if __name__ == "__main__":
     try: main()
