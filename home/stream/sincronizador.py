@@ -75,7 +75,7 @@ def get_remote_files(url, subfolder=""):
     return list(set(files))
 
 def main():
-    log(f"{C_BOLD}--- INICIANDO SINCRONIZADOR v3.2.5 ---{C_RESET}")
+    log(f"{C_BOLD}--- INICIANDO SINCRONIZADOR v3.3 ---{C_RESET}")
     log(f"🌍 Servidor: {SYNC_URL}")
     
     # 1. VERIFICAÇÃO E MONTAGEM
