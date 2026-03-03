@@ -43,6 +43,13 @@ echo " "
 echo "⏳ Dando um respiro de 10s estabilizar..."
 
 sleep 10
+# --- CORES ---
+C_RESET="\033[0m"
+C_GREEN="\033[1;32m"
+C_RED="\033[1;31m"
+C_YELLOW="\033[1;33m"
+C_CYAN="\033[1;36m"
+
 while true; do
     # 1. Carregar Configuração Dinâmica
     if [ -f "$CONFIG_FILE" ]; then
@@ -51,10 +58,10 @@ while true; do
         HORA_AGORA=$(date +'%H:%M')
         if [ -f "$CONFIG_FILE.error" ]; then
             ERROR_MSG=$(cat "$CONFIG_FILE.error")
-            echo "🚨 [$HORA_AGORA] ERRO: $ERROR_MSG"
+            echo -e "${C_RED}🚨 [$HORA_AGORA] ERRO: $ERROR_MSG${C_RESET}"
             echo "   (Verificando novamente em 60s...)"
         else
-            echo "💤 [$HORA_AGORA] Fora do horario de transmissao (Agenda)."
+            echo -e "${C_YELLOW}💤 [$HORA_AGORA] Fora do horario de transmissao (Agenda).${C_RESET}"
         fi
         sleep 60
         continue
@@ -62,8 +69,9 @@ while true; do
 
     HORA=$(date +'%H:%M:%S')
     echo " "
-    echo "🔄 [$HORA] Preparando live ($MODO - $PASTA_VIDEOS)..."
-    
+    echo -e "${C_GREEN}🚀 [$HORA] INICIANDO TRANSMISSÃO: ${C_CYAN}${PASTA_VIDEOS}${C_RESET}"
+    echo -e "   MODO: ${C_CYAN}${MODO}${C_RESET} | CHAVE: ${C_CYAN}${CHAVE:0:8}***${C_RESET}"
+
     # 2. Montar Playlist baseada no MODO (Sequential ou Random)
     if [ "$MODO" == "random" ]; then
         ls "$PASTA_VIDEOS"/*.mp4 | shuf > "$PLAYLIST.tmp"
