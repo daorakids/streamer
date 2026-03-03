@@ -1,15 +1,15 @@
-# Projeto Daora Kids v3.2 📺🍿
+# Projeto Daora Kids v3.2.1 📺🍿
 
-**Status:** v3.2 - Padronização Técnica: Scheduler (Antigo Cérebro).
+**Status:** v3.2.1 - Suporte a Cores ANSI no HDMI e Padronização.
 **Base:** Raspberry Pi OS Lite (64-bit) / Debian 13 (Bookworm/Trixie).
 
 ## 🚀 Arquitetura Atual (Sincronização Remota)
 
-1.  **Auto-login & Sistema (Mega Bootstrap v3.2):**
-    - **Nomenclatura Técnica:** O componente de lógica foi renomeado para **Scheduler**, com arquivos (`scheduler.py`) e serviços (`daorakids-scheduler.*`) atualizados.
-    - **Logs Coloridos (ANSI):** Identificação visual rápida por cores em todos os scripts.
-    - **Transfusão Inteligente:** Sincronizador v3.2 pronto para gerir transições MicroSD -> Pendrive.
-    - **Dominação HDMI Total:** Boot silencioso e auto-login garantidos.
+1.  **Auto-login & Sistema (Mega Bootstrap v3.2.1):**
+    - **HDMI Colorido:** Forçado `TERM=xterm-256color` no console físico para exibir logs coloridos no HDMI.
+    - **Nomenclatura Técnica:** Scheduler oficializado (arquivos e serviços).
+    - **Logs ANSI:** Identificação visual por cores em todos os componentes.
+    - **Dominação HDMI:** Boot silencioso e auto-login garantidos.
 
 2.  **Monitor de Transmissão (dashboard.sh):**
     - **Comandos de Controle:** `daora-start` e `daora-stop` integrados ao dashboard.
