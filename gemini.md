@@ -1,6 +1,7 @@
-# Projeto Daora Kids v3.1 📺🍿
+# Projeto Daora Kids v3.1.1 📺🍿
 
-**Status:** v3.1 - Padronização Dashboard e Nomenclaturas.
+**Status:** v3.1.1 - Especificação de OS e Padronização.
+**Base:** Raspberry Pi OS Lite (64-bit) / Debian 13 (Bookworm/Trixie).
 
 ## 🚀 Arquitetura Atual (Sincronização Remota)
 
