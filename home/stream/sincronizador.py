@@ -75,7 +75,7 @@ def get_remote_files(url, subfolder=""):
     return list(set(files))
 
 def main():
-    log(f"{C_BOLD}--- INICIANDO SINCRONIZADOR v3.2.2 ---{C_RESET}")
+    log(f"{C_BOLD}--- INICIANDO SINCRONIZADOR v3.2.3 ---{C_RESET}")
     log(f"🌍 Servidor: {SYNC_URL}")
     
     # 1. VERIFICAÇÃO E MONTAGEM
@@ -107,9 +107,18 @@ def main():
         os.makedirs(os.path.dirname(local_path), exist_ok=True)
         download_url = SYNC_URL + clean_rel_path
         
-        filename = os.path.basename(clean_rel_path)
+        # PROVA DE INTELIGÊNCIA: Comparar tamanhos antes de baixar
+        try:
+            head = requests.head(download_url, auth=HTTPBasicAuth(SYNC_USER, SYNC_PASS), timeout=10)
+            remote_size = int(head.headers.get('Content-Length', 0))
+            local_size = os.path.getsize(local_path) if os.path.exists(local_path) else -1
+            
+            if remote_size > 0 and remote_size == local_size:
+                log(f"⏩ [{i}/{total_remote}] {C_BOLD}{clean_rel_path}{C_RESET} (Já atualizado)")
+                continue
+        except: pass
+
         log(f"📥 [{i}/{total_remote}] {C_BOLD}{clean_rel_path}{C_RESET}")
-        
         cmd = ["wget", "--user", SYNC_USER, "--password", SYNC_PASS, "-c", "--no-verbose", "-O", local_path, download_url]
         subprocess.run(cmd)
 

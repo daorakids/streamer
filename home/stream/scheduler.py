@@ -119,7 +119,7 @@ def get_current_slot():
     return slot
 
 def main():
-    log_debug(f"{C_BOLD}--- INICIANDO SCHEDULER v3.2.2 ---{C_RESET}")
+    log_debug(f"{C_BOLD}--- INICIANDO SCHEDULER v3.2.3 ---{C_RESET}")
     update_schedule_from_web()
     
     # CHECK DE HARDWARE

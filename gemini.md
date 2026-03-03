@@ -1,15 +1,14 @@
-# Projeto Daora Kids v3.2.1 📺🍿
+# Projeto Daora Kids v3.2.3 📺🍿
 
-**Status:** v3.2.1 - Suporte a Cores ANSI no HDMI e Padronização.
+**Status:** v3.2.3 - Sincronizador Inteligente (Smart Skip).
 **Base:** Raspberry Pi OS Lite (64-bit) / Debian 13 (Bookworm/Trixie).
 
 ## 🚀 Arquitetura Atual (Sincronização Remota)
 
-1.  **Auto-login & Sistema (Mega Bootstrap v3.2.1):**
-    - **HDMI Colorido:** Forçado `TERM=xterm-256color` no console físico para exibir logs coloridos no HDMI.
-    - **Nomenclatura Técnica:** Scheduler oficializado (arquivos e serviços).
-    - **Logs ANSI:** Identificação visual por cores em todos os componentes.
-    - **Dominação HDMI:** Boot silencioso e auto-login garantidos.
+1.  **Auto-login & Sistema (Mega Bootstrap v3.2.3):**
+    - **Sincronizador Pro (v3.2.3):** Agora compara o tamanho do arquivo local com o do servidor antes de baixar. Se forem iguais, o download é pulado (`⏩ [PULADO]`), economizando banda e vida útil do pendrive.
+    - **HDMI Colorido:** Suporte a cores ANSI garantido no console físico (tty1).
+    - **Nomenclatura Técnica:** Scheduler oficializado.
 
 2.  **Monitor de Transmissão (dashboard.sh):**
     - **Comandos de Controle:** `daora-start` e `daora-stop` integrados ao dashboard.
