@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # ===============================================
-#  🚀 SUPER-BOOTSTRAP DAORA KIDS LIVE (v3.2.4)
+#  🚀 SUPER-BOOTSTRAP DAORA KIDS LIVE (v3.2.5)
 # ===============================================
 
 # 1. Privilégios e Argumentos
@@ -14,7 +14,7 @@ fi
 FORCE_MODE=$(echo "$1" | tr '[:upper:]' '[:lower:]')
 
 clear
-echo -e "\033[1;32m🎨 INICIANDO DOMINAÇÃO v3.2.4 (SCHEDULER)\033[0m"
+echo -e "\033[1;32m🎨 INICIANDO DOMINAÇÃO v3.2.5 (SCHEDULER)\033[0m"
 
 # 2. Garantir Sudoers para o usuário stream
 if ! id "stream" &>/dev/null; then
@@ -104,10 +104,20 @@ else
 fi
 
 # 9. Download Final dos Scripts
-echo "📦 Baixando scripts v3.2.4..."
+echo "📦 Baixando scripts v3.2.5..."
 TEMP_GIT="/tmp/daorakids_git"
 rm -rf $TEMP_GIT
 git clone --depth 1 https://github.com/daorakids/streamer.git $TEMP_GIT
+
+# FAXINA DE VERSÕES ANTIGAS (Limpeza de Fantasmas)
+echo "🧹 Eliminando vestigios de versoes antigas..."
+systemctl stop daorakids-cerebro.service daorakids-cerebro.timer 2>/dev/null
+systemctl disable daorakids-cerebro.service daorakids-cerebro.timer 2>/dev/null
+rm -f /etc/systemd/system/daorakids-cerebro.*
+rm -f /home/stream/daorakids-cerebro.*
+rm -f /home/stream/cerebro.py
+rm -f /home/stream/ver_live.sh
+
 cp -a $TEMP_GIT/home/stream/. /home/stream/
 rm -rf /home/stream/videos
 chown -R stream:stream /home/stream
@@ -125,7 +135,7 @@ systemctl start daorakids-scheduler.timer daorakids-sync.timer
 BASHRC="/home/stream/.bashrc"
 sed -i '/DAORA KIDS/,/fi/d' $BASHRC
 cat <<EOF >> $BASHRC
-# --- DAORA KIDS DASHBOARD v3.2.4 ---
+# --- DAORA KIDS DASHBOARD v3.2.5 ---
 alias ver='/home/stream/dashboard.sh'
 alias monitor='/home/stream/dashboard.sh'
 alias log='sudo journalctl -u daorakids-live.service -u daorakids-scheduler.service -u daorakids-sync.service -f'
@@ -141,7 +151,7 @@ if [ "\$(tty)" = "/dev/tty1" ]; then
 fi
 EOF
 
-echo -e "\n\033[1;32m✅ SUCESSO v3.2.4.1!\033[0m"
+echo -e "\n\033[1;32m✅ SUCESSO v3.2.5.1!\033[0m"
 echo "🔄 Reiniciando..."
 sync
 sleep 5
