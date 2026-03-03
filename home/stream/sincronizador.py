@@ -36,12 +36,20 @@ except ImportError as e:
 # --- CONFIGURAÇÃO ---
 BASE_DIR = "/home/stream"
 ENV_PATH = os.path.join(BASE_DIR, ".env")
-load_dotenv(ENV_PATH)
+
+if os.path.exists(ENV_PATH):
+    load_dotenv(ENV_PATH)
+else:
+    log(f"⚠️ Alerta: Arquivo {ENV_PATH} nao encontrado!")
 
 VIDEO_ROOT = "/mnt/videos"
 SYNC_URL = os.getenv("SYNC_URL", "https://daorakids.com.br/util/stream/").rstrip('/') + '/'
-SYNC_USER = os.getenv("SYNC_USER", "stream")
-SYNC_PASS = os.getenv("SYNC_PASS", "stream")
+SYNC_USER = os.getenv("SYNC_USER")
+SYNC_PASS = os.getenv("SYNC_PASS")
+
+if not SYNC_USER or not SYNC_PASS:
+    log("❌ ERRO: Credenciais SYNC_USER ou SYNC_PASS nao encontradas no .env!")
+    sys.exit(1)
 
 # Extrai o path da URL para validar caminhos absolutos
 BASE_PATH = urlparse(SYNC_URL).path.rstrip('/')
@@ -75,28 +83,21 @@ def get_remote_files(url, subfolder=""):
     return list(set(files))
 
 def main():
-    log(f"{C_BOLD}--- INICIANDO SINCRONIZADOR v3.3 ---{C_RESET}")
-    log(f"🌍 Servidor: {SYNC_URL}")
-    
-    # 1. VERIFICAÇÃO E MONTAGEM
-    is_mounted = subprocess.run("mount | grep /mnt/videos", shell=True, capture_output=True).returncode == 0
-    if not is_mounted:
-        log("⚠️ ALERTA: Pendrive nao detectado. Tentando montar 'DAORAKIDS'...")
-        res = subprocess.run("sudo mount -L DAORAKIDS /mnt/videos", shell=True, capture_output=True)
-        if res.returncode == 0:
-            log("   ✅ SUCESSO: Pendrive montado!")
-            is_mounted = True
-        else:
-            log("   ❌ ERRO: Usando MicroSD (Fallback).")
+    log(f"{C_BOLD}--- INICIANDO SINCRONIZADOR v3.3.1 ---{C_RESET}")
 
-    if not os.path.exists(VIDEO_ROOT): os.makedirs(VIDEO_ROOT, exist_ok=True)
+    
+    if not os.path.exists(VIDEO_ROOT):
+        try: os.makedirs(VIDEO_ROOT, exist_ok=True)
+        except Exception as e:
+            log(f"💥 Falha ao criar pasta {VIDEO_ROOT}: {e}")
+            sys.exit(1)
 
     log("📡 Mapeando arquivos remotos...")
     remote_files = get_remote_files(SYNC_URL)
     total_remote = len(remote_files)
     
     if total_remote == 0:
-        log("⚠️ Nenhum video encontrado.")
+        log("⚠️ Nenhum video encontrado no servidor.")
         sys.exit(0)
 
     log(f"✅ Encontrados {C_BOLD}{total_remote}{C_RESET} videos. Sincronizando...")
@@ -107,22 +108,26 @@ def main():
         os.makedirs(os.path.dirname(local_path), exist_ok=True)
         download_url = SYNC_URL + clean_rel_path
         
-        # PROVA DE INTELIGÊNCIA: Comparar tamanhos antes de baixar
         try:
-            head = requests.head(download_url, auth=HTTPBasicAuth(SYNC_USER, SYNC_PASS), timeout=10)
-            remote_size = int(head.headers.get('Content-Length', 0))
-            local_size = os.path.getsize(local_path) if os.path.exists(local_path) else -1
-            
-            if remote_size > 0 and remote_size == local_size:
-                log(f"⏩ [{i}/{total_remote}] {C_BOLD}{clean_rel_path}{C_RESET} (Já atualizado)")
-                continue
+            if os.path.exists(local_path):
+                head = requests.head(download_url, auth=HTTPBasicAuth(SYNC_USER, SYNC_PASS), timeout=10)
+                remote_size = int(head.headers.get('Content-Length', 0))
+                local_size = os.path.getsize(local_path)
+                if remote_size > 0 and remote_size == local_size:
+                    log(f"⏩ [{i}/{total_remote}] {C_BOLD}{clean_rel_path}{C_RESET} (Ja atualizado)")
+                    continue
         except: pass
 
         log(f"📥 [{i}/{total_remote}] {C_BOLD}{clean_rel_path}{C_RESET}")
         cmd = ["wget", "--user", SYNC_USER, "--password", SYNC_PASS, "-c", "--no-verbose", "-O", local_path, download_url]
-        subprocess.run(cmd)
+        res = subprocess.run(cmd)
+        if res.returncode != 0:
+            log(f"❌ Erro ao baixar {clean_rel_path} (Wget exit: {res.returncode})")
 
     log("✨ Sincronizacao finalizada!")
 
 if __name__ == "__main__":
-    main()
+    try: main()
+    except Exception as e:
+        log(f"💥 ERRO FATAL: {e}")
+        sys.exit(1)
