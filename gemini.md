@@ -1,14 +1,15 @@
-# Projeto Daora Kids v2.9.3 📺🍿
+# Projeto Daora Kids v2.9.6 📺🍿
 
-**Status:** v2.9.3 - Sincronismo Acelerado (10 min).
+**Status:** v2.9.6 - Dominação de Hardware e Drivers de Pendrive.
 
 ## 🚀 Arquitetura Atual (Sincronização Remota)
 
-1.  **Auto-login & Sistema (Mega Bootstrap v2.9.3):**
-    - **Sincronismo Acelerado:** Timer de sincronização agora roda a cada **10 minutos** (OnCalendar=*:0/10), garantindo atualizações rápidas.
-    - **Sincronizador Pro:** Resolvido bug de caminhos aninhados e arquivos zero bytes.
-    - **Modo Silencioso:** Update automático via `setup.sh` simplificado.
-    - **Dominação HDMI:** Boot limpo e dashboard automático garantidos.
+1.  **Auto-login & Sistema (Mega Bootstrap v2.9.6):**
+    - **Dominação de Hardware:** Instalação automática de drivers `exfat-fuse` e `ntfs-3g` para garantir que qualquer pendrive seja reconhecido.
+    - **Resiliência de Montagem:** Removida a dependência rígida que travava o sincronizador caso o pendrive demorasse a subir.
+    - **Sincronizador v2.9.6:** Resolvido bug de caminhos aninhados e arquivos zero bytes.
+    - **Modo Silencioso Inteligente:** Update automático via `setup.sh` simplificado.
+    - **Dominação HDMI Total:** Expurgo de cloud-init e reconstrução de boot garantidos.
 
 2.  **Monitor de Transmissão (`ver_live.sh`):**
     - **Comandos de Controle:** `daora-start` e `daora-stop` integrados ao dashboard.
