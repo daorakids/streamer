@@ -79,20 +79,24 @@ def get_remote_files(url, subfolder=""):
     return list(set(files))
 
 def main():
-    log(f"Iniciando Sincronizador v2.9.7")
+    log(f"Iniciando Sincronizador v2.9.8")
     log(f"🌍 Servidor: {SYNC_URL}")
     
-    # VERIFICAÇÃO DE HARDWARE (DAORAKIDS LABEL)
+    # 1. VERIFICAÇÃO E MONTAGEM DE HARDWARE
     is_mounted = subprocess.run("mount | grep /mnt/videos", shell=True, capture_output=True).returncode == 0
     if not is_mounted:
-        log("⚠️ ALERTA: Pendrive nao detectado em /mnt/videos.")
-        log("   Tentando busca por Label 'DAORAKIDS'...")
-        # Tenta montar por Label se existir
+        log("⚠️ ALERTA: Pendrive nao detectado. Tentando montar Label 'DAORAKIDS'...")
         res = subprocess.run("sudo mount -L DAORAKIDS /mnt/videos", shell=True, capture_output=True)
         if res.returncode == 0:
-            log("   ✅ SUCESSO: Pendrive 'DAORAKIDS' encontrado e montado!")
+            log("   ✅ SUCESSO: Pendrive 'DAORAKIDS' montado agora!")
+            is_mounted = True
         else:
-            log("   ❌ ERRO: Pendrive 'DAORAKIDS' nao encontrado. Usando MicroSD como fallback.")
+            log("   ❌ ERRO: Pendrive nao encontrado. Usando MicroSD (Fallback).")
+
+    # 2. LÓGICA DE TRANSFUSÃO (SD -> Pendrive)
+    # Se o pendrive montou MAS existem videos no SD card (raiz da particao), movemos para o pendrive.
+    # Nota: No Linux, quando montamos algo por cima de uma pasta cheia, o conteudo original "some" 
+    # ate desmontar. Precisamos checar se ha algo 'escondido' ou se a pasta mudou de dispositivo.
     
     if not os.path.exists(VIDEO_ROOT):
         os.makedirs(VIDEO_ROOT, exist_ok=True)

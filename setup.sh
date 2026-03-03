@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # ===============================================
-#  🚀 SUPER-BOOTSTRAP DAORA KIDS LIVE (v2.9.7)
+#  🚀 SUPER-BOOTSTRAP DAORA KIDS LIVE (v2.9.8)
 # ===============================================
 
 # 1. Privilégios e Argumentos
@@ -14,7 +14,7 @@ fi
 FORCE_MODE=$(echo "$1" | tr '[:upper:]' '[:lower:]')
 
 clear
-echo -e "\033[1;32m🎨 INICIANDO DOMINAÇÃO v2.9.7\033[0m"
+echo -e "\033[1;32m🎨 INICIANDO DOMINAÇÃO v2.9.8\033[0m"
 
 # 2. Garantir Sudoers para o usuário stream
 if ! id "stream" &>/dev/null; then
@@ -104,7 +104,7 @@ else
 fi
 
 # 9. Download Final dos Scripts
-echo "📦 Baixando scripts v2.9.7..."
+echo "📦 Baixando scripts v2.9.8..."
 TEMP_GIT="/tmp/daorakids_git"
 rm -rf $TEMP_GIT
 git clone --depth 1 https://github.com/daorakids/streamer.git $TEMP_GIT
@@ -125,7 +125,7 @@ systemctl start daorakids-cerebro.timer daorakids-sync.timer
 BASHRC="/home/stream/.bashrc"
 sed -i '/DAORA KIDS/,/fi/d' $BASHRC
 cat <<EOF >> $BASHRC
-# --- DAORA KIDS DASHBOARD v2.9.7 ---
+# --- DAORA KIDS DASHBOARD v2.9.8 ---
 alias ver='/home/stream/ver_live.sh'
 alias log='sudo journalctl -u daorakids-live.service -u daorakids-cerebro.service -u daorakids-sync.service -f'
 alias monitor='/home/stream/ver_live.sh'
@@ -139,7 +139,7 @@ if [ "\$(tty)" = "/dev/tty1" ]; then
 fi
 EOF
 
-echo -e "\n\033[1;32m✅ SUCESSO v2.9.7!\033[0m"
+echo -e "\n\033[1;32m✅ SUCESSO v2.9.8!\033[0m"
 echo "🔄 Reiniciando..."
 sync
 sleep 5

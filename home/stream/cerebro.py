@@ -105,7 +105,7 @@ def get_current_slot():
     return slot
 
 def main():
-    log_debug("--- INICIANDO CEREBRO v2.9.7 ---")
+    log_debug("--- INICIANDO CEREBRO v2.9.8 ---")
     update_schedule_from_web()
     
     # CHECK DE HARDWARE (Aviso de Pendrive Missing)
