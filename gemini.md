@@ -1,13 +1,13 @@
-# Projeto Daora Kids v2.9.8 📺🍿
+# Projeto Daora Kids v3.0 (RAINBOW) 📺🍿
 
-**Status:** v2.9.8 - Transfusão Inteligente de Armazenamento.
+**Status:** v3.0 - Logs Coloridos ANSI e Maturidade de Sistema.
 
 ## 🚀 Arquitetura Atual (Sincronização Remota)
 
-1.  **Auto-login & Sistema (Mega Bootstrap v2.9.8):**
-    - **Transfusão Inteligente:** Sincronizador agora detecta se o pendrive `DAORAKIDS` foi montado e move automaticamente os vídeos do MicroSD para ele.
-    - **Resiliência de Hardware:** Busca agressiva por Label e fallback automático para o MicroSD.
-    - **Sincronizador Pro:** Resolvido bug de pastas aninhadas e arquivos de zero bytes.
+1.  **Auto-login & Sistema (Mega Bootstrap v3.0):**
+    - **Logs Coloridos (ANSI):** Identificação visual rápida por cores (Magenta=Cérebro, Ciano=Sync, Verde=Live, Vermelho=Erro).
+    - **Transfusão Inteligente:** Sincronizador v3.0 move automaticamente vídeos do MicroSD para o pendrive se detectado.
+    - **Sincronismo Acelerado:** Timer agora roda a cada 10 minutos para atualizações rápidas.
     - **Dominação HDMI Total:** Boot limpo e dashboard automático garantidos.
 
 2.  **Monitor de Transmissão (`ver_live.sh`):**
