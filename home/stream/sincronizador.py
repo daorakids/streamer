@@ -79,8 +79,20 @@ def get_remote_files(url, subfolder=""):
     return list(set(files))
 
 def main():
-    log(f"Iniciando Sincronizador v2.9.6")
+    log(f"Iniciando Sincronizador v2.9.7")
     log(f"🌍 Servidor: {SYNC_URL}")
+    
+    # VERIFICAÇÃO DE HARDWARE (DAORAKIDS LABEL)
+    is_mounted = subprocess.run("mount | grep /mnt/videos", shell=True, capture_output=True).returncode == 0
+    if not is_mounted:
+        log("⚠️ ALERTA: Pendrive nao detectado em /mnt/videos.")
+        log("   Tentando busca por Label 'DAORAKIDS'...")
+        # Tenta montar por Label se existir
+        res = subprocess.run("sudo mount -L DAORAKIDS /mnt/videos", shell=True, capture_output=True)
+        if res.returncode == 0:
+            log("   ✅ SUCESSO: Pendrive 'DAORAKIDS' encontrado e montado!")
+        else:
+            log("   ❌ ERRO: Pendrive 'DAORAKIDS' nao encontrado. Usando MicroSD como fallback.")
     
     if not os.path.exists(VIDEO_ROOT):
         os.makedirs(VIDEO_ROOT, exist_ok=True)

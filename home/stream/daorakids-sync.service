@@ -1,5 +1,6 @@
 [Unit]
-Description=Daora Kids Sync Service (Python v2.9.6)
+Description=Daora Kids Sync Service (Python v2.9.7)
+
 After=network-online.target
 Wants=network-online.target
 

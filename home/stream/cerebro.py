@@ -105,8 +105,13 @@ def get_current_slot():
     return slot
 
 def main():
-    log_debug("--- INICIANDO CEREBRO v2.9.6 ---")
+    log_debug("--- INICIANDO CEREBRO v2.9.7 ---")
     update_schedule_from_web()
+    
+    # CHECK DE HARDWARE (Aviso de Pendrive Missing)
+    is_mounted = subprocess.run("mount | grep /mnt/videos", shell=True, capture_output=True).returncode == 0
+    if not is_mounted:
+        log_debug("⚠️ AVISO: Pendrive nao detectado! Gravando no MicroSD (Fallback).")
     
     # VALIDACAO DE PRONTIDAO
     missing = check_all_languages_ready()
