@@ -16,7 +16,7 @@ def run_cmd(cmd, sudo=False, capture=False):
 
 def setup_wizard():
     print("\n" + "="*40)
-    print(" 🎨 INSTALADOR/UPDATER DAORA KIDS v3.0 ")
+    print(" 🎨 INSTALADOR/UPDATER DAORA KIDS v3.1 ")
     print("="*40 + "\n")
 
     BASE_DIR = "/home/stream"
@@ -84,7 +84,7 @@ def setup_wizard():
         with open("/tmp/cmdline.txt", "w") as f: f.write(new_line + "\n")
         run_cmd(f"cp /tmp/cmdline.txt {cmdline_path}", sudo=True)
 
-    # 6. Servicos Systemd (Otimizados v3.0)
+    # 6. Servicos Systemd (Otimizados v3.1)
     print("⚙️  Configurando servicos do systemd...")
     
     sync_service = f"""[Unit]
@@ -127,14 +127,14 @@ WantedBy=multi-user.target
     # 7. Dashboard .bashrc
     bashrc_path = "/home/stream/.bashrc"
     bashrc_addon = """
-# --- DAORA KIDS DASHBOARD v3.0 ---
-alias ver='/home/stream/ver_live.sh'
+# --- DAORA KIDS DASHBOARD v3.1 ---
+alias ver='/home/stream/dashboard.sh'
 alias log='sudo journalctl -u daorakids-live.service -u daorakids-cerebro.service -u daorakids-sync.service -f'
-alias monitor='/home/stream/ver_live.sh'
+alias monitor='/home/stream/dashboard.sh'
 if [ "$(tty)" = "/dev/tty1" ]; then
     sleep 3
     clear
-    /home/stream/ver_live.sh
+    /home/stream/dashboard.sh
 fi
 """
     run_cmd(f"sed -i '/DAORA KIDS/,/fi/d' {bashrc_path}", sudo=True)
@@ -150,7 +150,7 @@ fi
     print("🧠 Inicializando Cerebro...")
     run_cmd(f"sudo -u stream /usr/bin/python3 {BASE_DIR}/cerebro.py")
     
-    print("\n✅ Setup v3.0 concluído! Reiniciando em 5s...")
+    print("\n✅ Setup v3.1 concluído! Reiniciando em 5s...")
     run_cmd("sync", sudo=True)
     time.sleep(5)
     run_cmd("reboot", sudo=True)

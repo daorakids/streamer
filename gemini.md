@@ -1,14 +1,14 @@
-# Projeto Daora Kids v3.0 (RAINBOW) 📺🍿
+# Projeto Daora Kids v3.1 📺🍿
 
-**Status:** v3.0 - Logs Coloridos ANSI e Maturidade de Sistema.
+**Status:** v3.1 - Padronização Dashboard e Nomenclaturas.
 
 ## 🚀 Arquitetura Atual (Sincronização Remota)
 
-1.  **Auto-login & Sistema (Mega Bootstrap v3.0):**
-    - **Logs Coloridos (ANSI):** Identificação visual rápida por cores (Magenta=Cérebro, Ciano=Sync, Verde=Live, Vermelho=Erro).
-    - **Transfusão Inteligente:** Sincronizador v3.0 move automaticamente vídeos do MicroSD para o pendrive se detectado.
-    - **Sincronismo Acelerado:** Timer agora roda a cada 10 minutos para atualizações rápidas.
-    - **Dominação HDMI Total:** Boot limpo e dashboard automático garantidos.
+1.  **Auto-login & Sistema (Mega Bootstrap v3.1):**
+    - **Nomenclatura Limpa:** O arquivo motor do dashboard agora se chama `dashboard.sh` (substituindo `ver_live.sh`).
+    - **Logs Coloridos (ANSI):** Identificação visual rápida por cores em todos os scripts Python e Bash.
+    - **Transfusão Inteligente:** Sincronizador v3.1 pronto para gerir transições MicroSD -> Pendrive.
+    - **Dominação HDMI Total:** Boot silencioso e auto-login garantidos.
 
 2.  **Monitor de Transmissão (`ver_live.sh`):**
     - **Comandos de Controle:** `daora-start` e `daora-stop` integrados ao dashboard.

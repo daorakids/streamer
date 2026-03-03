@@ -121,7 +121,7 @@ def get_current_slot():
     return slot
 
 def main():
-    log_debug(f"{C_BOLD}--- INICIANDO CEREBRO v3.0 ---{C_RESET}")
+    log_debug(f"{C_BOLD}--- INICIANDO CEREBRO v3.1 ---{C_RESET}")
     update_schedule_from_web()
     
     # CHECK DE HARDWARE
