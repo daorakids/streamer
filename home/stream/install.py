@@ -84,7 +84,7 @@ def setup_wizard():
         with open("/tmp/cmdline.txt", "w") as f: f.write(new_line + "\n")
         run_cmd(f"cp /tmp/cmdline.txt {cmdline_path}", sudo=True)
 
-    # 6. Servicos Systemd (Otimizados v2.8.25)
+    # 6. Servicos Systemd (Otimizados v3.0)
     print("⚙️  Configurando servicos do systemd...")
     
     sync_service = f"""[Unit]
